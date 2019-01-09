@@ -193,7 +193,7 @@ func checker(domain string, response gorequest.Response, body string,  provider 
 
 func main() {
 
-	path:=os.Getenv("GOPATH")+"/src/github.com/proabiral/Inception/"
+	path:=os.Getenv("GOPATH")+"/src/github.com/proabiral/inception/"
 
 	flag.IntVar(&Threads,"t",200,"No of threads")
 	flag.StringVar(&ProviderFile,"provider",path+"provider.json","Path of provider file")
