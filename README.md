@@ -49,7 +49,7 @@ bugcrowd.com
 ```
 
 Q. How do I add my own test cases?    
-You can use [providerCreate.html](https://proabiral.github.io/Inception/providerCreate) to generate JSON. Just fill in the details and JSON as shown below will be generated.
+You can use [providerCreate.html](https://proabiral.github.io/Inception/providerCreate.html) to generate JSON. Just fill in the details and JSON as shown below will be generated.
 ```
 [
    {
@@ -82,14 +82,14 @@ The name of tool is inspired from the movie Inception where DiCaprio steals secr
 Also, `inception` because this is the first tool I am open sourcing.
 
 ### TODO
-1) Add more vulnerability checks
-2) Implement ReGex search in Response
-3) Add key to each test case in provider.json and option to select/ignore a test case
-4) Output result to file
-5) Randomize User-Agent
-6) Code refactor
+1. Add more vulnerability checks
+2. Implement ReGex search in Response
+3. Add key to each test case in provider.json and option to select/ignore a test case
+4. Output result to file
+5. Randomize User-Agent
+6. Code refactor
 
 ## Thanks 
-Thanks to [Iceman](https://twitter.com/Ice3man543) for reviewing the tool and the suggesting this cool name.
+Thanks to [Iceman](https://twitter.com/Ice3man543) for reviewing the tool and suggesting this cool name.
 Also concurrency module has been shamelessly stolen from his [Subover project](https://github.com/Ice3man543/SubOver)
 
