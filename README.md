@@ -10,17 +10,17 @@ The use of goroutine makes it very fast but it doesn't hammer a single domain co
 ### Installation
 Just make sure you have go installed and run the following command.
 ```sh
-go get github.com/proabiral/Inception
+go get github.com/proabiral/inception
 ```
 
 ### Usage
 ```
-▶️  Inception -h
-    Usage of Inception:
+▶️  inception -h
+    Usage of inception:
       -d string
-          Path of list of domains to run against (default "/home/user/go/src/github.com/proabiral/Inception/domains.txt")
+          Path of list of domains to run against (default "/home/user/go/src/github.com/proabiral/inception/domains.txt")
       -provider string
-          Path of provider file (default "/home/user/go/src/github.com/proabiral/Inception/provider.json")
+          Path of provider file (default "/home/user/go/src/github.com/proabiral/inception/provider.json")
       -t int
           No of threads (default 200)
       -timeout int
@@ -30,7 +30,7 @@ go get github.com/proabiral/Inception
    
 #### Examples
 ```
-▶️ Inception -d /path/to/domainlist.txt
+▶️ inception -d /path/to/domainlist.txt
 Issue detected : Server status is publicly viewable http://127.0.0.1/server-status response contains all check
 Issue detected : PHP info is publicly viewable http://127.0.0.1/phpinfo.php response contains all check
 Completed
@@ -49,7 +49,7 @@ bugcrowd.com
 ```
 
 Q. How do I add my own test cases?    
-You can use [providerCreate.html](https://proabiral.github.io/Inception/providerCreate.html) to generate JSON. Just fill in the details and JSON as shown below will be generated.
+You can use [providerCreate.html](https://proabiral.github.io/inception/providerCreate.html) to generate JSON. Just fill in the details and JSON as shown below will be generated.
 ```
 [
    {
@@ -74,7 +74,7 @@ You can use [providerCreate.html](https://proabiral.github.io/Inception/provider
 ```
 Save the generated JSON to some file and then run the tool by providing the path to the json file with `-provider` option:
 ```
-▶️  Inception -provider /path/to/your/provider.json -d /path/to/your/domainlist.txt
+▶️  inception -provider /path/to/your/provider.json -d /path/to/your/domainlist.txt
 ```
 
 Q. Whats with the name?    
