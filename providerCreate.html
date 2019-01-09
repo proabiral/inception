@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<script> 
+
+    const hintText="{{ Fill details above for new test case }}"
+
+
+    const PayloadHeaderDiv="<div id=\"payloadHeaderDiv\"> Header Name <input type=\"text\" name=\"payload1\" required class=\"payload\">  Header Value <input type=\"text\" name=\"payload2\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br> <br> </div>"
+
+    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+
+    const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+
+    const responseBodyDiv="<div id=\"responseDiv\"> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"> {Case Sensitive ; Leave empty if you want to only send request} <br> <br> </div>"
+
+
+    const responseHeaderDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+
+    const responseHeaderDiv="<div id=\"responseDiv\">What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\">{Case Sensitive ; Leave empty if you want to only send request}  <br> <br> </div>"
+
+    function changeOption(xoxo){
+        document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=xoxo.selectedIndex})
+    }
+
+    function payloadBody(){
+        if(document.getElementById('sendIn').value == "header") {
+            document.querySelector("#payloadDiv").innerHTML=PayloadHeaderDiv;
+            document.getElementById('minusbuttonID').style="display:none"
+        }
+        else{
+            document.querySelector("#payloadDiv").innerHTML=PayloadBodyDiv
+        }
+    }
+
+
+    function responseDiv(){
+        if(document.getElementById('checkIn').value == "responseHeader") {
+            document.querySelector("#responseDiv").innerHTML=responseHeaderDiv;
+            document.getElementById('minusbuttonID').style="display:none"
+        }
+        else{
+           document.querySelector("#responseDiv").innerHTML=responseBodyDiv
+        }
+    }
+
+    jsonIndex=0
+    function jsonGenerator() {
+
+        json[jsonIndex]=new Object();
+        json[jsonIndex].vulnerability=document.querySelector("#vulnerability").value
+        json[jsonIndex].sendIn=document.querySelector("#sendIn").value
+        json[jsonIndex].color=document.querySelector("#color").value
+        json[jsonIndex].payload=new Array();
+       // json[0].payload[0]=document.querySelector("#payload").value
+
+        x=document.querySelectorAll("#payloadDiv input[type=\"text\"]")
+        for (var i = 0; i < x.length; i++) {
+            json[jsonIndex].payload[i]=x[i].value;
+            }
+
+        json[jsonIndex].checkIn=document.querySelector("#checkIn").value
+
+        y=document.querySelectorAll(".response")
+
+        json[jsonIndex].checkFor=""
+
+        document.querySelector("#sendIn").value
+
+        if(document.getElementById('checkIn').value == "responseBody") { 
+            for (var i=0; i < y.length; i++){
+                if (i==0){
+                    json[jsonIndex].checkFor=y[i].value
+                }
+                else if (y[i].value !== ""){
+                    delimiter=document.querySelector(".delimiter").value
+                    json[jsonIndex].checkFor=y[i].value+delimiter+json[jsonIndex].checkFor
+                }
+            }
+         }
+
+        else{
+            for (var i=0; i < y.length; i+=2){
+                if (i==0){
+                    json[jsonIndex].checkFor=y[i].value+": "+y[i+1].value
+                }
+                else if (y[i].value !== ""){
+                    delimiter=document.querySelector(".delimiter").value
+                    json[jsonIndex].checkFor=y[i].value+": "+y[i+1].value+delimiter+json[jsonIndex].checkFor
+                }
+            }
+        }
+        
+    }
+    
+    function addPayloadField() {
+        if(document.getElementById('sendIn').value == "header") {
+            document.querySelector("#payloadDiv").insertAdjacentHTML("beforeend",PayloadHeaderDiv)
+        }
+
+        else{
+            document.querySelector("#payloadDiv").insertAdjacentHTML("beforeend",PayloadBodyDiv)
+        }
+    }
+
+    function addResponseField(){
+        if(document.getElementById('checkIn').value == "responseBody") {       
+            document.querySelector("#responseDiv").insertAdjacentHTML("beforeend",responseBodyDivS)
+        }
+        else{
+            document.querySelector("#responseDiv").insertAdjacentHTML("beforeend",responseHeaderDivS)
+        }   
+            document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=document.querySelector('.delimiter').selectedIndex})
+    }
+
+    function minusButton(xoxo){
+        xoxo.parentElement.parentElement.removeChild(xoxo.parentElement)
+    }
+
+    function vulnerabilityIsEmpty(){
+        if (document.forms[0].vulnerability.value=="") {
+            alert("fill up the vulnerability details")
+            return true
+         }
+         else{
+            return false
+         }
+     }
+      
+
+    function payloadIsEmpty(){
+        var payloadFieldArray=document.querySelectorAll(".payload")
+        for (var i = 0; i < payloadFieldArray.length; i++) {
+            if (payloadFieldArray[i].value==""){
+                    alert("fill up all payload section")
+                    return true
+            }
+            else{
+                return false
+            }
+        }
+    }
+    
+    function isNotEmpty(){
+        if (!vulnerabilityIsEmpty() && !payloadIsEmpty()){
+            return true
+         }
+    }
+
+
+    function saveValue(){
+
+    }
+
+    function moreVulnerability(xoxo){
+        if (isNotEmpty()){
+            console.log("works")
+            jsonGenerator();
+            jsonIndex++;
+
+            previousValueCheckIn = document.querySelector("#checkIn").value
+            previousValueSendIn = document.querySelector("#sendIn").value
+
+            if (document.querySelector(".delimiter")){
+                previousID = document.querySelector(".delimiter").selectedIndex
+            }
+            xoxo.form.reset();
+            document.querySelector("#checkIn").value = previousValueCheckIn  
+            document.querySelector("#sendIn").value = previousValueSendIn
+
+            document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=previousID})
+            document.querySelector('#jsonOutput').value=JSON.stringify(json, null, 4)
+            document.getElementById('hint').innerText=hintText;
+            }
+    }
+
+
+    function jsonPrint(xoxo){
+        if (isNotEmpty()){ 
+            jsonGenerator()
+
+            previousValueCheckIn = document.querySelector("#checkIn").value
+            previousValueSendIn = document.querySelector("#sendIn").value
+
+            xoxo.form.reset()
+
+            document.querySelector("#checkIn").value = previousValueCheckIn
+            document.querySelector("#sendIn").value = previousValueSendIn  //restoring to previous value
+
+            document.querySelector('#jsonOutput').value=JSON.stringify(json, null, 4)
+        }
+}
+</script>
+
+
+<body onload="json=new Array();">
+    <h1>
+        Create json file for provider
+    </h1>
+
+    <form>
+    Vulnerability Name:
+    <input type="text" name="vulnerability" id="vulnerability" required> <br><br>
+
+   Send payload in:
+    <select name="sendIn" id="sendIn" onchange="payloadBody()">
+        <option value="url">URL</option>
+        <option value="header">Request Header</option>
+    </select> <br><br> <!--drop down url | header -->
+
+    <div id="payloadDiv">
+        <div id="payloadHeaderDiv">
+            Endpoint where request will be send:
+            <input type="text" class="payload" required> <input type="button" value="+" onclick="addPayloadField()"> <br><br>
+        </div>
+    </div>
+
+   Check in
+    <select name="checkIn" id="checkIn" onchange="responseDiv()">
+        <option value="responseBody">Response Body</option>
+        <option value="responseHeader">Response Header</option>
+    </select> <br><br> <!-- drop down responseBody -->
+
+    <div id="responsePdiv">
+        <div id="responseDiv">
+              What to check for in Response Body<input type="text" name="checkFor" class="response" id="checkFor" required> <input type="button" value="+" onclick="addResponseField()"> {Case Sensitive ; Leave empty if you want to only send request}  <br><br>
+        </div>
+    </div>
+
+   Severity to Assign
+    <select name="color" id="color">
+        <option value="red">High</option>
+        <option value="yellow">Medium</option>
+        <option value="blue">Low</option>
+    </select> <br>
+
+    <input type="button" value="Add more vulnerabilities" onclick="moreVulnerability(this);">
+
+<div id="hint"> </div>
+    <br> <br>
+
+    <input type="button" value="Generate JSON" onclick="jsonPrint(this)">
+
+    <br>
+
+    </form>
+
+    <textarea id="jsonOutput" rows="80" cols="90">
+
+    </textarea>
+
+</body>
+
+
+
+<style>
+
+    body {
+    display: block;
+    margin: 8px;
+    margin-top: 8px;
+    margin-right: 20%;
+    margin-left: 20%;
+}
+
+</style>
+
+
+</html>

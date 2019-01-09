@@ -1,0 +1,5 @@
+facebook.com
+twitter.com
+gmail.com
+hackerone.com
+bugcrowd.com
