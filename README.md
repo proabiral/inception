@@ -1,9 +1,11 @@
 # Inception
 **Inception** is a highly configurable tool to check for whatever you like against any number of hosts.
 
+This tool comes handy for bugbounty hunters who want to check for specific endpoint on large number of hosts and report if the endpoint contains certain string in response.
+
 Inception is a Go version of [Snallygaster](https://github.com/hannob/snallygaster) and comes with a large number of test cases derived from Snallygaster plus more, added by me.
 
-What differentiate Inception from Snallygaster is- it allows users to create & provide their own test cases without touching a single line of code.
+What differentiate Inception from Snallygaster is - it allows users to create & provide their own test cases without touching a single line of code.
 
 The use of goroutine makes it very fast but it doesn't hammer a single domain concurrently with a large number of requests.
 
