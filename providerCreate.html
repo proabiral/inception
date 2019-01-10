@@ -9,7 +9,7 @@
 
     const PayloadHeaderDiv="<div id=\"payloadHeaderDiv\"> Header Name <input type=\"text\" name=\"payload1\" required class=\"payload\">  Header Value <input type=\"text\" name=\"payload2\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br> <br> </div>"
 
-    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
     const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
@@ -212,7 +212,7 @@
     <div id="payloadDiv">
         <div id="payloadHeaderDiv">
             Endpoint where request will be send:
-            <input type="text" class="payload" required> <input type="button" value="+" onclick="addPayloadField()"> <br><br>
+            <input type="text" class="payload" value="/" required> <input type="button" value="+" onclick="addPayloadField()"> <br><br>
         </div>
     </div>
 
