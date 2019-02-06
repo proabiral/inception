@@ -133,5 +133,30 @@
       "checkIn": "responseBody",
       "checkFor": "DB_PASSWORD=||||APP_ENV=",
       "color": "red"
+    },
+    {
+        "vulnerability": "XSS",
+        "sendIn": "url",
+        "color": "red",
+        "payload": [
+            "/canary'\"\"'>><svg/onload=alert(1)>"
+        ],
+        "checkIn": "responseBody",
+        "checkFor": "<svg onload=alert(1)>"
+    },
+    {
+        "vulnerability": "CORS misconfiguration",
+        "sendIn": "header",
+        "color": "red",
+        "payload": [
+            "Origin",
+            "null",
+            "Origin",
+            "https://doesnot.exists"
+        ],
+        "checkIn": "responseHeader",
+        "checkFor": "Access-Control-Allow-Origin: https://doesnot.exists||||Access-Control-Allow-Origin: null"
     }
   ]
+
+
