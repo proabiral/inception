@@ -27,6 +27,8 @@ go get github.com/proabiral/inception
           Path of provider file (default "/home/user/go/src/github.com/proabiral/inception/provider.json")
       -t int
           No of threads (default 200)
+      -silent
+    	Only prints when issue detected
       -timeout int
           HTTP request Timeout (default 10)
       -v Verbose mode
