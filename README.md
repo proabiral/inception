@@ -17,6 +17,11 @@ Just make sure you have go installed and run the following command.
 go get github.com/proabiral/inception
 ```
 
+### Update
+```sh
+go get -u github.com/subfinder/subfinder
+```
+
 ### Usage
 ```
 ▶️  inception -h
