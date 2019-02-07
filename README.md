@@ -3,7 +3,9 @@
 
 This tool comes handy for bugbounty hunters who want to check for specific endpoint on large number of hosts and report if the endpoint contains certain string in response.
 
-Inception is a Go version of [Snallygaster](https://github.com/hannob/snallygaster) and comes with a large number of test cases derived from Snallygaster plus more, added by me.
+Inception is a Go version of [Snallygaster](https://github.com/hannob/snallygaster) and comes with a large number of test cases derived from Snallygaster plus more, added by me.    
+
+Default test cases includes: test for publicly accesible git config file, .env file, magento config file, php info file, server stats page, Rails and Symfony database config files, CORS Misconfiguration check, basic XSS check at web root and few others.    
 
 What differentiate Inception from Snallygaster is - it allows users to create & provide their own test cases without touching a single line of code.
 
@@ -37,8 +39,9 @@ Issue detected : Server status is publicly viewable http://127.0.0.1/server-stat
 Issue detected : PHP info is publicly viewable http://127.0.0.1/phpinfo.php response contains all check
 Completed
 ```
-All detected issues will be printed on screen as shown above. While if no issue is detected, a completion message is shown as `Completd`.
-
+All detected issues will be printed on screen as shown above. While if no issue is detected, a completion message is shown as `Completed`.    
+Note: If error like `provider.json: no such file or directory` is thrown, provide the path of provider.json {default one located at your-gopath/src/github.com/proabiral/inception/provider.json} file with -provider option.    
+    
 ### FAQs
 Q. How should my domain list look like?    
 A sample of domain list is provided with the tool. It's basically a list of line seperated domains without no protocol.
