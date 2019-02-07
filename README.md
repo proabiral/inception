@@ -19,7 +19,7 @@ go get github.com/proabiral/inception
 
 ### Update
 ```sh
-go get -u github.com/subfinder/subfinder
+go get -u github.com/proabiral/inception
 ```
 
 ### Usage
