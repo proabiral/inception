@@ -45,7 +45,6 @@ var (
 	Verbose      bool
 	ProviderFile string
 	Timeout      int
-	Silent 		 bool
 )
 
 var (
@@ -77,18 +76,8 @@ func readLines(file string) []string{
 func errCheck(err error) {
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 }
-
-
-func printIfNotSilent(message string){
-	if !Silent{
-		fmt.Println(message)
-	}
-}
-
-
 
 func request(domain string, provider Provider) ([]error) {
 		if provider.SendIn == "url" {
@@ -129,7 +118,7 @@ func request(domain string, provider Provider) ([]error) {
 			}
 
 			if Verbose {
-				fmt.Println(url, provider.Payload[i]+": "+provider.Payload[i+1])
+				fmt.Println(url, provider.Payload[i]+":"+provider.Payload[i+1])
 			}
 				checker(domain, response, body, provider, provider.Payload[i])
 
@@ -208,51 +197,26 @@ func checker(domain string, response gorequest.Response, body string,  provider 
 
 func main() {
 
-
 	path:=os.Getenv("GOPATH")+"/src/github.com/proabiral/inception/"
 
 	flag.IntVar(&Threads,"t",200,"No of threads")
 	flag.StringVar(&ProviderFile,"provider",path+"provider.json","Path of provider file")
 	flag.StringVar(&DomainList,"d",path+"domains.txt","Path of list of domains to run against")
 	flag.BoolVar(&Verbose,"v",false,"Verbose mode")
-	flag.BoolVar(&Silent,"silent",false,"Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
 	flag.IntVar(&Timeout,"timeout",10,"HTTP request Timeout")
 	flag.Parse()
-
-	printIfNotSilent(`
-(_)                    | | (_)            
- _ _ __   ___ ___ _ __ | |_ _  ___  _ __  
-| | '_ \ / __/ _ \ '_ \| __| |/ _ \| '_ \ 
-| | | | | (_|  __/ |_) | |_| | (_) | | | |
-|_|_| |_|\___\___| .__/ \__|_|\___/|_| |_|
-                 | |                      
-                 |_|                      
-
-	
-	`)
-
-	printIfNotSilent("Reading Providers from list at "+ProviderFile)
-
 
 	contentJson := readFile(ProviderFile)
 
 	err := json.Unmarshal([]byte(contentJson), &myProvider)
 	errCheck(err)
-
-
-	printIfNotSilent("Reading Domains from list at "+DomainList)
-
-
-
+	
 	domains := readLines(DomainList)
 
 	hosts := make(chan string, Threads)
 	providerC := make(chan Provider)
 	processGroup := new(sync.WaitGroup)
 	processGroup.Add(Threads)
-
-	printIfNotSilent("Running test cases against provided domains ..... ")
-
 
 	for i := 0; i < Threads; i++ {
 		go func() {
@@ -285,7 +249,5 @@ func main() {
 	close(providerC)
 	processGroup.Wait()
 
-	printIfNotSilent("Reading Domains from list at "+DomainList)
-
-
+	fmt.Println("Completed")
 }
