@@ -2,7 +2,7 @@
   {
   "vulnerability":"PHP info is publicly viewable",
     "sendIn":"url",
-    "payload":["/php.php","/phpinfo.php","/info.php"],
+    "payload":["/php.php","/phpinfo.php","/info.php","/_profiler/phpinfo"],
     "checkIn":"responseBody",
     "checkFor":"PHP Extension&&&&PHP API&&&&PHP Version",
     "color":"red"
@@ -13,6 +13,14 @@
   "payload":["/server-status"],
   "checkIn":"responseBody",
   "checkFor":"Apache Server Status&&&&Server Version&&&&CPU Usage:",
+  "color":"yellow"
+  },
+  {
+  "vulnerability":"Tomcat Server status is publicly viewable",
+  "sendIn":"url",
+  "payload":["/status?full=true"],
+  "checkIn":"responseBody",
+  "checkFor":"Current thread count",
   "color":"yellow"
   },
   {
