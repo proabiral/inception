@@ -31,6 +31,13 @@
     "checkFor":"[core]",
     "color":"red"
   },
+    "vulnerability":"Magento Config Exposed",
+    "sendIn":"url",
+    "payload":["/app/etc/local.xml","/store/app/etc/local.xml"],
+    "checkIn":"responseBody",
+    "checkFor":"<config>",
+    "color":"red"
+  },
     {
       "vulnerability": "Lazy File Manager",
       "sendIn": "url",
