@@ -46,7 +46,6 @@ var (
 	ProviderFile string
 	Timeout      int
 	Silent 		 bool
-	port 		 int
 	https		 bool
 )
 
@@ -226,7 +225,6 @@ func main() {
 	flag.BoolVar(&Verbose,"v",false,"Verbose mode")
 	flag.BoolVar(&Silent,"silent",false,"Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
 	flag.IntVar(&Timeout,"timeout",10,"HTTP request Timeout")
-	flag.IntVar(&port,"port",80,"port to send request to")
 	flag.BoolVar(&https,"https",false,"force https")
 	flag.Parse()
 
@@ -297,5 +295,5 @@ func main() {
 	processGroup.Wait()
 
 	printIfNotSilent("Completed")
-	
+
 }
