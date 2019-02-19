@@ -46,12 +46,15 @@ var (
 	ProviderFile string
 	Timeout      int
 	Silent 		 bool
+	port 		 int
+	https		 bool
 )
 
 var (
 	delimiter string
 	ifVulnerable bool
 	match string
+	scheme string
 )
 
 func readFile(file string) string{
@@ -91,9 +94,15 @@ func printIfNotSilent(message string){
 
 
 func request(domain string, provider Provider) ([]error) {
+	if https{
+		scheme = "https://"
+	} else {
+		scheme = "http://"
+	}
+
 		if provider.SendIn == "url" {
 			for _, payload := range (provider.Payload) {
-				url := "http://" + domain + payload
+				url := scheme+domain+payload
 				response, body, err := gorequest.New().
 					TLSClientConfig(&tls.Config{ InsecureSkipVerify: true}).
 					Timeout(time.Second*10).
@@ -109,13 +118,13 @@ func request(domain string, provider Provider) ([]error) {
 					fmt.Println(url)
 				}
 
-				checker(domain, response, body, provider, payload)
+				checker(url, response, body, provider, payload)
 			}
 
 		} else if provider.SendIn == "header" {
-			url := "http://" + domain
 			//need to rewrite , need to better represent in json
 			for i := 0; i < len(provider.Payload); i += 2 {
+				url := scheme+domain
 				response, body, err := gorequest.New().
 					TLSClientConfig(&tls.Config{ InsecureSkipVerify: true}).
 					Timeout(time.Second*10).
@@ -173,14 +182,14 @@ func checkerLogic(checkAgainst string, stringToCheck []string) (bool,string){   
 func printFunc(provider Provider, domain string, payload string){
 	if ifVulnerable {
 		if provider.SendIn == "url" {
-			fmt.Println("Issue detected :", color(provider.Color, provider.Vulnerability), "http://"+domain+payload, "response contains", match)
+			fmt.Println("Issue detected :", color(provider.Color, provider.Vulnerability), domain, "response contains", match)
 		} else {
 			fmt.Println("Issue detected :", color(provider.Color, provider.Vulnerability), domain, "Payload Send",payload, "response contains", match)
 		}
 	}
 }
 
-func checker(domain string, response gorequest.Response, body string,  provider Provider, payload string)  {
+func checker(url string, response gorequest.Response, body string,  provider Provider, payload string)  {
 
 	var stringToCheck []string
 
@@ -195,14 +204,14 @@ func checker(domain string, response gorequest.Response, body string,  provider 
 	//color:=provider.Color
 	if provider.CheckIn == "responseBody"{
 		ifVulnerable,match=checkerLogic(body,stringToCheck)
-		printFunc(provider,domain,payload)
+		printFunc(provider,url,payload)
 	}	else{
 			var responseHeaders string
 			for headerName, value := range response.Header {
 				responseHeaders+=headerName+": "+value[0]+"\n"
 			}
 			ifVulnerable, match= checkerLogic(responseHeaders, stringToCheck)
-			printFunc(provider,domain,payload)
+			printFunc(provider,url,payload)
 	}
 }
 
@@ -217,6 +226,8 @@ func main() {
 	flag.BoolVar(&Verbose,"v",false,"Verbose mode")
 	flag.BoolVar(&Silent,"silent",false,"Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
 	flag.IntVar(&Timeout,"timeout",10,"HTTP request Timeout")
+	flag.IntVar(&port,"port",80,"port to send request to")
+	flag.BoolVar(&https,"https",false,"force https")
 	flag.Parse()
 
 	printIfNotSilent(`
@@ -285,7 +296,6 @@ func main() {
 	close(providerC)
 	processGroup.Wait()
 
-	printIfNotSilent("Reading Domains from list at "+DomainList)
-
-
+	printIfNotSilent("Completed")
+	
 }
