@@ -7,6 +7,22 @@
     "checkFor":"PHP Extension&&&&PHP API&&&&PHP Version",
     "color":"red"
   },
+   {
+        "vulnerability": "WP-Config Exposed",
+        "sendIn": "url",
+        "color": "red",
+        "payload": [
+            "/wp-config.php~",
+            "/wp-config.php.save",
+            "/wp-config.php_bak",
+            "/wp-config.php.bak",
+            "/wp-config.php.old",
+            "/wp-config.php.orig",
+            "/wp-config.php.original"
+        ],
+        "checkIn": "responseBody",
+        "checkFor": "DB_USER"
+    },
   {
   "vulnerability":"Server status is publicly viewable",
   "sendIn":"url",
