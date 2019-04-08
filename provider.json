@@ -24,6 +24,14 @@
         "checkFor": "DB_USER"
     },
   {
+  "vulnerability":"phpMyAdmin is publicly viewable",
+  "sendIn":"url",
+  "payload":["/phpMyAdmin"],
+  "checkIn":"responseBody",
+  "checkFor":"phpMyAdmin",
+  "color":"red"
+  },
+  {
   "vulnerability":"Server status is publicly viewable",
   "sendIn":"url",
   "payload":["/server-status"],
