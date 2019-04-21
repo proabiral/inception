@@ -181,6 +181,16 @@
         ],
         "checkIn": "responseHeader",
         "checkFor": "Access-Control-Allow-Origin: https://doesnot.exists||||Access-Control-Allow-Origin: null"
+    },
+    {
+      "vulnerability": "Apple App-Site Association file detected",
+      "sendIn": "url",
+      "payload": [
+        "/.well-known/apple-app-site-association"
+      ],
+      "checkIn": "responseBody",
+      "checkFor": "applinks",
+      "color": "red"
     }
   ]
 
