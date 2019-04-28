@@ -192,6 +192,18 @@
       "checkFor": "applinks",
       "color": "red"
     }
+  ,
+   {
+        "vulnerability": "Whitelabel Error Page",
+        "sendIn": "url",
+        "color": "yellow",
+        "payload": [
+            "/",
+            "/asx"
+        ],
+        "checkIn": "responseBody",
+        "checkFor": "Whitelabel Error Page"
+    }
   ]
 
 
