@@ -192,6 +192,19 @@
       "checkFor": "applinks",
       "color": "red"
     }
+  ,
+   {
+        "vulnerability": "ckeditor Available",
+        "sendIn": "url",
+        "color": "yellow",
+        "payload": [
+            "/assets/js/ckeditor/",
+            "/assets/js/ckfinder/",
+            "/assets/js/ckeditor/ckeditor.js"
+        ],
+        "checkIn": "responseBody",
+        "checkFor": "Folders||||Index of /assets/js/ckfinder||||Index of /assets/js/ckeditor||||Copyright (c) 2003-2013"
+    }
   ]
 
 
