@@ -28,7 +28,7 @@
   "sendIn":"url",
   "payload":["/phpMyAdmin"],
   "checkIn":"responseBody",
-  "checkFor":"phpMyAdmin",
+  "checkFor":"Welcome to phpMyAdmin",
   "color":"red"
   },
   {
