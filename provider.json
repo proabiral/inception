@@ -28,7 +28,15 @@
   "sendIn":"url",
   "payload":["/phpMyAdmin"],
   "checkIn":"responseBody",
-  "checkFor":"Welcome to phpMyAdmin",
+  "checkFor":"Welcome to <bdo",
+  "color":"red"
+  },
+  {
+  "vulnerability":"phpMyAdmin is publicly viewable",
+  "sendIn":"url",
+  "payload":["/phpmyadmin"],
+  "checkIn":"responseBody",
+  "checkFor":"Welcome to <bdo",
   "color":"red"
   },
   {
