@@ -7,9 +7,9 @@
     const hintText="{{ Fill details above for new test case }}"
 
 
-    const PayloadHeaderDiv="<div id=\"payloadHeaderDiv\"> Header Name <input type=\"text\" name=\"payload1\" required class=\"payload\">  Header Value <input type=\"text\" name=\"payload2\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br> <br> </div>"
+    const PayloadHeaderDiv="<div id=\"payloadHeaderDiv\"> Header Name <input type=\"text\" name=\"payload1\" required class=\"payload\">  Header Value <input type=\"text\" name=\"payload2\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addHeaderField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br> <br> </div>"
 
-    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addPayloadField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addEndpointField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
     const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
@@ -22,16 +22,6 @@
 
     function changeOption(xoxo){
         document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=xoxo.selectedIndex})
-    }
-
-    function payloadBody(){
-        if(document.getElementById('sendIn').value == "header") {
-            document.querySelector("#payloadDiv").innerHTML=PayloadHeaderDiv;
-            document.getElementById('minusbuttonID').style="display:none"
-        }
-        else{
-            document.querySelector("#payloadDiv").innerHTML=PayloadBodyDiv
-        }
     }
 
 
@@ -50,23 +40,38 @@
 
         json[jsonIndex]=new Object();
         json[jsonIndex].vulnerability=document.querySelector("#vulnerability").value
-        json[jsonIndex].sendIn=document.querySelector("#sendIn").value
+        json[jsonIndex].method=document.querySelector("#method").value
         json[jsonIndex].color=document.querySelector("#color").value
-        json[jsonIndex].payload=new Array();
-       // json[0].payload[0]=document.querySelector("#payload").value
 
-        x=document.querySelectorAll("#payloadDiv input[type=\"text\"]")
-        for (var i = 0; i < x.length; i++) {
-            json[jsonIndex].payload[i]=x[i].value;
+        json[jsonIndex].body=document.querySelector("#postBody").value
+
+        json[jsonIndex].endpoint=new Array();
+        json[jsonIndex].headers=new Array();
+
+        endpoints=document.querySelectorAll("#endPointPDiv input[type=\"text\"]")
+        for (var i = 0; i < endpoints.length; i++) {
+            json[jsonIndex].endpoint[i]=endpoints[i].value;
             }
+
+        
+        json[jsonIndex].headers=new Array();
+
+        headers=document.querySelectorAll("#headerPDiv input[type=\"text\"]");
+
+        for (var i=0; i < headers.length; i+=2){
+            if (headers[i].value!=""){
+                j=i/2
+                json[jsonIndex].headers[j]=new Array();
+                json[jsonIndex].headers[j][0]=headers[i].value
+                json[jsonIndex].headers[j][1]=headers[i+1].value
+            }
+        }        
 
         json[jsonIndex].checkIn=document.querySelector("#checkIn").value
 
         y=document.querySelectorAll(".response")
 
         json[jsonIndex].checkFor=""
-
-        document.querySelector("#sendIn").value
 
         if(document.getElementById('checkIn').value == "responseBody") { 
             for (var i=0; i < y.length; i++){
@@ -94,15 +99,13 @@
         
     }
     
-    function addPayloadField() {
-        if(document.getElementById('sendIn').value == "header") {
-            document.querySelector("#payloadDiv").insertAdjacentHTML("beforeend",PayloadHeaderDiv)
+    function addEndpointField() {
+            document.querySelector("#endPointPDiv").insertAdjacentHTML("beforeend",PayloadBodyDiv)
         }
 
-        else{
-            document.querySelector("#payloadDiv").insertAdjacentHTML("beforeend",PayloadBodyDiv)
-        }
-    }
+    function addHeaderField() {
+        document.querySelector("#headerPDiv").insertAdjacentHTML("beforeend",PayloadHeaderDiv)
+          }
 
     function addResponseField(){
         if(document.getElementById('checkIn').value == "responseBody") {       
@@ -160,14 +163,12 @@
             jsonIndex++;
 
             previousValueCheckIn = document.querySelector("#checkIn").value
-            previousValueSendIn = document.querySelector("#sendIn").value
 
             if (document.querySelector(".delimiter")){
                 previousID = document.querySelector(".delimiter").selectedIndex
             }
             xoxo.form.reset();
             document.querySelector("#checkIn").value = previousValueCheckIn  
-            document.querySelector("#sendIn").value = previousValueSendIn
 
             document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=previousID})
             document.querySelector('#jsonOutput').value=JSON.stringify(json, null, 4)
@@ -175,19 +176,16 @@
             }
     }
 
-
     function jsonPrint(xoxo){
         if (isNotEmpty()){ 
             jsonGenerator()
 
             previousValueCheckIn = document.querySelector("#checkIn").value
-            previousValueSendIn = document.querySelector("#sendIn").value
 
             xoxo.form.reset()
 
             document.querySelector("#checkIn").value = previousValueCheckIn
-            document.querySelector("#sendIn").value = previousValueSendIn  //restoring to previous value
-
+           
             document.querySelector('#jsonOutput').value=JSON.stringify(json, null, 4)
         }
 }
@@ -203,18 +201,30 @@
     Vulnerability Name:
     <input type="text" name="vulnerability" id="vulnerability" required> <br><br>
 
-   Send payload in:
-    <select name="sendIn" id="sendIn" onchange="payloadBody()">
-        <option value="url">URL</option>
-        <option value="header">Request Header</option>
-    </select> <br><br> <!--drop down url | header -->
 
-    <div id="payloadDiv">
-        <div id="payloadHeaderDiv">
+    Method
+    <select name="method" id="method">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+    </select> <br><br>
+
+    <div id="endPointPDiv">
+        <div id="endpointDiv">
             Endpoint where request will be send:
-            <input type="text" class="payload" value="/" required> <input type="button" value="+" onclick="addPayloadField()"> <br><br>
+            <input type="text" class="payload" value="/" required> <input type="button" value="+" onclick="addEndpointField()"> <br><br>
         </div>
     </div>
+
+    <div id="headerPDiv">
+        Headers to be send {leave empty if you don't want any custom header}
+        <div id="headerDiv"> Header Name <input type="text" name="payload1">  Header Value <input type="text" name="payload2" class="payload"><input type="button" value="+" onclick="addHeaderField()"><input id="minusbuttonID" type="button" value="-" onclick="minusButton(this)" style="display: none;"><br> <br> 
+        </div>
+    </div>
+
+    Body to be send in request<br> <textarea rows="10" cols="80" id="postBody" placeholder='Place post data as follows ; make sure to use appropriate Content-Type: header if needed;&#10;{"username":"admin","password":"secret"} &#10;or&#10;field1=value1&field2=value2&#10;or&#10;--boundary &#10;Content-Disposition: form-data; name="field1" &#10;&#10;value1 &#10;--boundary &#10;Content-Disposition: form-data; name="field2"; filename="example.txt" &#10;'></textarea> <br><br>
+
 
    Check in
     <select name="checkIn" id="checkIn" onchange="responseDiv()">
