@@ -21,10 +21,12 @@ type Provider struct {
 	Method        string     `json:"method"`
 	Body          string     `json:"body"`
 	Endpoint      []string   `json:"endpoint"`
+	SendIn        string     `json:"sendIn"`
 	Headers       [][]string `json:"headers"`
 	CheckIn       string     `json:"checkIn"`
 	CheckFor      string     `json:"checkFor"`
 	Color         string     `json:"color"`
+	StatusCode    int        `json:"statusCode"`
 }
 
 func color(c string, text string) Value {
@@ -172,6 +174,8 @@ func checker(url string, response gorequest.Response, body string, provider Prov
 
 	var stringToCheck []string
 
+	//get status code to match from provider, if nostatus code present leave as it is. If present, status code must be matched to procced furhter check.....
+
 	if strings.Contains(provider.CheckFor, "&&&&") {
 		stringToCheck = strings.Split(provider.CheckFor, "&&&&")
 		delimiter = "&&&&"
@@ -180,17 +184,28 @@ func checker(url string, response gorequest.Response, body string, provider Prov
 		delimiter = "||||"
 	}
 
-	//color:=provider.Color
-	if provider.CheckIn == "responseBody" {
-		ifVulnerable, match = checkerLogic(body, stringToCheck)
-		printFunc(provider, url, endpoint)
-	} else {
-		var responseHeaders string
-		for headerName, value := range response.Header {
-			responseHeaders += headerName + ": " + value[0] + "\n"
+	wrapper := func() {
+		if provider.CheckIn == "responseBody" {
+			ifVulnerable, match = checkerLogic(body, stringToCheck)
+			printFunc(provider, url, endpoint)
+		} else {
+			var responseHeaders string
+			for headerName, value := range response.Header {
+				responseHeaders += headerName + ": " + value[0] + "\n"
+			}
+			ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck)
+			printFunc(provider, url, endpoint)
 		}
-		ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck)
-		printFunc(provider, url, endpoint)
+	}
+
+	if provider.StatusCode == 0 { //when not defined.
+		wrapper() // check for stings defined in provider
+	} else {
+		if provider.StatusCode == response.StatusCode {
+			wrapper() // check for stings defined in provider
+		} else {
+			ifVulnerable, match = false, "not vulnerable" //if statusCode does not match ; not vulnerable
+		}
 	}
 }
 

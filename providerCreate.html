@@ -6,7 +6,6 @@
 
     const hintText="{{ Fill details above for new test case }}"
 
-
     const PayloadHeaderDiv="<div id=\"payloadHeaderDiv\"> Header Name <input type=\"text\" name=\"payload1\" required class=\"payload\">  Header Value <input type=\"text\" name=\"payload2\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addHeaderField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br> <br> </div>"
 
     const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addEndpointField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
@@ -52,7 +51,6 @@
         for (var i = 0; i < endpoints.length; i++) {
             json[jsonIndex].endpoint[i]=endpoints[i].value;
             }
-
         
         json[jsonIndex].headers=new Array();
 
@@ -70,6 +68,10 @@
         json[jsonIndex].checkIn=document.querySelector("#checkIn").value
 
         y=document.querySelectorAll(".response")
+
+        if (document.getElementById("statusCode").value != "") {
+            json[jsonIndex].statusCode=Number(document.getElementById("statusCode").value)
+        }
 
         json[jsonIndex].checkFor=""
 
@@ -225,6 +227,11 @@
 
     Body to be send in request<br> <textarea rows="10" cols="80" id="postBody" placeholder='Place post data as follows ; make sure to use appropriate Content-Type: header if needed;&#10;{"username":"admin","password":"secret"} &#10;or&#10;field1=value1&field2=value2&#10;or&#10;--boundary &#10;Content-Disposition: form-data; name="field1" &#10;&#10;value1 &#10;--boundary &#10;Content-Disposition: form-data; name="field2"; filename="example.txt" &#10;'></textarea> <br><br>
 
+   Status Code : <input type="number" id="statusCode">
+   
+   <br>{Status code that need to be matched for vulnerability detection, leave empty if status code check is not needed.}
+    <br><br>
+
 
    Check in
     <select name="checkIn" id="checkIn" onchange="responseDiv()">
@@ -240,10 +247,10 @@
 
    Severity to Assign
     <select name="color" id="color">
-        <option value="red">High</option>
-        <option value="yellow">Medium</option>
         <option value="blue">Low</option>
-    </select> <br>
+        <option value="yellow">Medium</option>
+        <option value="red">High</option>
+    </select> <br><br>
 
     <input type="button" value="Add more vulnerabilities" onclick="moreVulnerability(this);">
 
