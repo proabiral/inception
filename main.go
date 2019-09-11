@@ -108,7 +108,7 @@ func request(domain string, provider Provider) []error {
 		url := scheme + domain + endpoint
 		method := provider.Method
 		if len(provider.Headers) == 0 { // todo correct this if statement, when no header is supplied.
-			response, body, _ := gorequest.New().
+			response, body, err := gorequest.New().
 				TLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
 				Timeout(time.Second*10).
 				CustomMethod(method, url).
@@ -116,9 +116,15 @@ func request(domain string, provider Provider) []error {
 				Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36").
 				Send(provider.Body).
 				End()
+
+			if err != nil {
+				return nil
+			}
+			defer response.Body.Close()
+
 			checker(url, response, body, provider, endpoint)
 		} else {
-			response, body, _ := gorequest.New().
+			response, body, err := gorequest.New().
 				TLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
 				Timeout(time.Second*10).
 				Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36").
@@ -126,6 +132,12 @@ func request(domain string, provider Provider) []error {
 				CustomHeader(provider.Headers). //added this method this gorequest library ... need to fork that library and import in this project so that everone pulling this could use it
 				Send(provider.Body).
 				End()
+
+			if err != nil {
+				return nil
+			}
+			defer response.Body.Close()
+
 			checker(url, response, body, provider, endpoint)
 		}
 	}
