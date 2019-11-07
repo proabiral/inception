@@ -26,7 +26,7 @@ type Provider struct {
 	CheckIn       string     `json:"checkIn"`
 	CheckFor      string     `json:"checkFor"`
 	Color         string     `json:"color"`
-	StatusCode    int        `json:"statusCode"`
+	StatusCode    []int      `json:"statusCode"`
 }
 
 func color(c string, text string) Value {
@@ -185,6 +185,7 @@ func printFunc(provider Provider, domain string, endpoint string) {
 func checker(url string, response gorequest.Response, body string, provider Provider, endpoint string) {
 
 	var stringToCheck []string
+	var vulnerable bool
 
 	//get status code to match from provider, if nostatus code present leave as it is. If present, status code must be matched to procced furhter check.....
 
@@ -210,12 +211,18 @@ func checker(url string, response gorequest.Response, body string, provider Prov
 		}
 	}
 
-	if provider.StatusCode == 0 { //when not defined.
+	if (len(provider.StatusCode)==0){//when not defined.
 		wrapper() // check for stings defined in provider
 	} else {
-		if provider.StatusCode == response.StatusCode {
-			wrapper() // check for stings defined in provider
-		} else {
+		// loop through provider.StatusCode and call wrapper and end the loop if any match
+		for _, statusCode := range provider.StatusCode {
+			if statusCode == response.StatusCode {
+				wrapper() // check for stings defined in provider
+				vulnerable=true
+				break
+			}
+		}
+		if !vulnerable {
 			ifVulnerable, match = false, "not vulnerable" //if statusCode does not match ; not vulnerable
 		}
 	}

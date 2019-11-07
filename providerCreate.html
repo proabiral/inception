@@ -10,6 +10,8 @@
 
     const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addEndpointField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
+    const StatusCodeBodyDiv="  <div id=\"StatusCodeBodyDiv\">   Status Code : <input type=\"number\" id=\"statusCode\"> <input type=\"button\" value=\"+\" onclick=\"addStatuCodeField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br>   </div>"
+
     const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
     const responseBodyDiv="<div id=\"responseDiv\"> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"> {Case Sensitive ; Leave empty if you want to only send request} <br> <br> </div>"
@@ -70,7 +72,12 @@
         y=document.querySelectorAll(".response")
 
         if (document.getElementById("statusCode").value != "") {
-            json[jsonIndex].statusCode=Number(document.getElementById("statusCode").value)
+            json[jsonIndex].statusCode=new Array();
+
+            statusCode=document.querySelectorAll("#StatusCodeBodyDiv input[type=\"number\"]")
+            for (var i = 0; i < statusCode.length; i++) {
+                json[jsonIndex].statusCode[i]=Number(statusCode[i].value);
+            }
         }
 
         json[jsonIndex].checkFor=""
@@ -105,6 +112,10 @@
             document.querySelector("#endPointPDiv").insertAdjacentHTML("beforeend",PayloadBodyDiv)
         }
 
+    function addStatuCodeField() {
+        document.querySelector("#StatusCodeBodyDiv").insertAdjacentHTML("beforeend",StatusCodeBodyDiv)
+    }
+
     function addHeaderField() {
         document.querySelector("#headerPDiv").insertAdjacentHTML("beforeend",PayloadHeaderDiv)
           }
@@ -118,6 +129,9 @@
         }   
             document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=document.querySelector('.delimiter').selectedIndex})
     }
+
+
+
 
     function minusButton(xoxo){
         xoxo.parentElement.parentElement.removeChild(xoxo.parentElement)
@@ -227,11 +241,12 @@
 
     Body to be send in request<br> <textarea rows="10" cols="80" id="postBody" placeholder='Place post data as follows ; make sure to use appropriate Content-Type: header if needed;&#10;{"username":"admin","password":"secret"} &#10;or&#10;field1=value1&field2=value2&#10;or&#10;--boundary &#10;Content-Disposition: form-data; name="field1" &#10;&#10;value1 &#10;--boundary &#10;Content-Disposition: form-data; name="field2"; filename="example.txt" &#10;'></textarea> <br><br>
 
-   Status Code : <input type="number" id="statusCode">
-   
-   <br>{Status code that need to be matched for vulnerability detection, leave empty if status code check is not needed.}
-    <br><br>
+  <div id="StatusCodeBodyDiv">
+   Status Code : <input type="number" id="statusCode"> <input type="button" value="+" onclick="addStatuCodeField()">
 
+  </div>
+        {Status code that need to be matched for vulnerability detection, leave empty if status code check is not needed.}
+        <br><br>
 
    Check in
     <select name="checkIn" id="checkIn" onchange="responseDiv()">
