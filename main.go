@@ -11,7 +11,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 	. "github.com/logrusorgru/aurora"
 	"github.com/proabiral/gorequest"
 	"strconv"
@@ -96,7 +95,7 @@ func printIfNotSilent(message string) {
 }
 
 func request(domain string, provider Provider) []error {
-
+	var url string
 	if https {
 		scheme = "https://"
 	} else {
@@ -106,7 +105,15 @@ func request(domain string, provider Provider) []error {
 	// get array of Endpoint and loop endpoint here, so that same bug can be checked on multiple endpoint.
 	for _, endpoint := range provider.Endpoint {
 
-		url := scheme + domain + endpoint
+		if (strings.Contains(domain, "://")){
+			url = domain + endpoint
+			fmt.Println(url)
+		}	else{
+		// if url with http:// or https:// is not passed scheme is added
+			url = scheme + domain + endpoint
+			fmt.Println(url)
+		}
+
 		method := provider.Method
 		if len(provider.Headers) == 0 { // todo correct this if statement, when no header is supplied.
 			response, body, err := gorequest.New().
@@ -256,7 +263,7 @@ func main() {
 	flag.BoolVar(&Verbose, "v", false, "Verbose mode")
 	flag.BoolVar(&Silent, "silent", false, "Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
 	flag.IntVar(&Timeout, "timeout", 10, "HTTP request Timeout")
-	flag.BoolVar(&https, "https", false, "force https")
+	flag.BoolVar(&https, "https", false, "force https (works only if scheme is not provided in domain list")
 	flag.Parse()
 
 	printIfNotSilent(`
