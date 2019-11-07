@@ -14,6 +14,7 @@ import (
 
 	. "github.com/logrusorgru/aurora"
 	"github.com/proabiral/gorequest"
+	"strconv"
 )
 
 type Provider struct {
@@ -176,9 +177,26 @@ func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { 
 	return true, "Error, check code returned from last return statement" //  golang throws error without return at end, all return statements are inside if else so golang needs to make sure if function returns
 }
 
-func printFunc(provider Provider, domain string, endpoint string) {
+func printFunc(provider Provider, domain string, endpoint string, statusCode int) {
 	if ifVulnerable {
-		fmt.Println("Issue detected :", color(provider.Color, provider.Vulnerability), "Domain: "+domain, "response contains", match, "; Endpoint: "+endpoint, "; Method: "+provider.Method, "; Body: "+provider.Body) //also need to print headers but can't print provider.Headers directly as its [][]string, need to convert to string before.
+		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
+		fmt.Println("Domain            -"+domain)		//also need to print headers but can't print provider.Headers directly as its [][]string, need to convert to string before.
+		fmt.Println("Endpoint          -"+ endpoint)
+		fmt.Println("Headers           -")
+		for _, header := range(provider.Headers){
+			fmt.Print("                   ")
+			fmt.Println(header[0],":",header[1])
+		}
+
+		fmt.Println("Request Body      -"+provider.Body)
+
+		fmt.Println("")
+		fmt.Println("")
+
+		fmt.Println("Response Status Code   - "+strconv.Itoa(statusCode))
+
+		fmt.Println(provider.CheckIn+" contains -"+provider.CheckFor)
+		fmt.Println("          --------------------------------------------------------------------------------          ")
 	}
 }
 
@@ -197,27 +215,27 @@ func checker(url string, response gorequest.Response, body string, provider Prov
 		delimiter = "||||"
 	}
 
-	wrapper := func() {
+	wrapper := func(statusCode int) {
 		if provider.CheckIn == "responseBody" {
 			ifVulnerable, match = checkerLogic(body, stringToCheck)
-			printFunc(provider, url, endpoint)
+			printFunc(provider, url, endpoint, statusCode)
 		} else {
 			var responseHeaders string
 			for headerName, value := range response.Header {
 				responseHeaders += headerName + ": " + value[0] + "\n"
 			}
 			ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck)
-			printFunc(provider, url, endpoint)
+			printFunc(provider, url, endpoint, statusCode)
 		}
 	}
 
 	if (len(provider.StatusCode)==0){//when not defined.
-		wrapper() // check for stings defined in provider
+		wrapper(response.StatusCode) // check for stings defined in provider
 	} else {
 		// loop through provider.StatusCode and call wrapper and end the loop if any match
 		for _, statusCode := range provider.StatusCode {
 			if statusCode == response.StatusCode {
-				wrapper() // check for stings defined in provider
+				wrapper(statusCode) // check for stings defined in provider
 				vulnerable=true
 				break
 			}
