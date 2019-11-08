@@ -191,7 +191,19 @@
       "checkIn": "responseBody",
       "checkFor": "applinks",
       "color": "red"
+    },
+  
+   {
+        "vulnerability": "S3 Open Bucket Disclosure",
+        "sendIn": "url",
+        "color": "red",
+        "payload": [
+            "/"
+        ],
+        "checkIn": "responseBody",
+        "checkFor": "ListBucketResult"
     }
+  
   ]
 
 
