@@ -14,6 +14,8 @@ import (
 	. "github.com/logrusorgru/aurora"
 	"github.com/proabiral/gorequest"
 	"strconv"
+	"net/url"
+	"golang.org/x/net/publicsuffix"
 )
 
 type Provider struct {
@@ -94,8 +96,22 @@ func printIfNotSilent(message string) {
 	}
 }
 
+func stringReplacer(URL string, value string) string{
+	u, _ := url.Parse(URL)
+	fqdn:=u.Host
+	domain, _ := publicsuffix.EffectiveTLDPlusOne(fqdn)
+	tld, _ := publicsuffix.PublicSuffix(fqdn)
+	hostname := strings.Replace(domain, "."+tld, "", -1)
+	r := strings.NewReplacer("$fqdn", fqdn,
+		"$domain", domain,
+		"$hostname", hostname)
+	// Replace all pairs.
+	result := r.Replace(value)
+	return result
+}
+
 func request(domain string, provider Provider) []error {
-	var url string
+	var URL string
 	if https {
 		scheme = "https://"
 	} else {
@@ -106,20 +122,31 @@ func request(domain string, provider Provider) []error {
 	for _, endpoint := range provider.Endpoint {
 
 		if (strings.Contains(domain, "://")){
-			url = domain + endpoint
-			fmt.Println(url)
+			URL = domain + endpoint
 		}	else{
-		// if url with http:// or https:// is not passed scheme is added
-			url = scheme + domain + endpoint
-			fmt.Println(url)
+		// if URL with http:// or https:// is not passed scheme is added
+			URL = scheme + domain + endpoint
 		}
+
+		//replacing keywords {$domain, $host, $fqdn} from endpoints,vulnerability name, body and checkFor if any
+		// need to find a way to replace headers
+		URL=stringReplacer(URL,URL)
+		provider.Vulnerability=stringReplacer(URL,provider.Vulnerability)
+		provider.Body = stringReplacer(URL,provider.Body)
+		provider.CheckFor = stringReplacer(URL,provider.CheckFor)
+
+		//   Replacing header does not works
+		//for _,header := range provider.Headers {
+		//	header[0] = stringReplacer(URL,header[0])
+		//	header[1] = stringReplacer(URL,header[1])
+		//}
 
 		method := provider.Method
 		if len(provider.Headers) == 0 { // todo correct this if statement, when no header is supplied.
 			response, body, err := gorequest.New().
 				TLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
 				Timeout(time.Second*10).
-				CustomMethod(method, url).
+				CustomMethod(method, URL).
 				Set("Referer", scheme+domain+"/").
 				Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36").
 				Send(provider.Body).
@@ -130,13 +157,13 @@ func request(domain string, provider Provider) []error {
 			}
 			defer response.Body.Close()
 
-			checker(url, response, body, provider, endpoint)
+			checker(URL, response, body, provider, endpoint)
 		} else {
 			response, body, err := gorequest.New().
 				TLSClientConfig(&tls.Config{InsecureSkipVerify: true}).
 				Timeout(time.Second*10).
 				Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36").
-				CustomMethod(method, url).
+				CustomMethod(method, URL).
 				CustomHeader(provider.Headers). //added this method this gorequest library ... need to fork that library and import in this project so that everone pulling this could use it
 				Send(provider.Body).
 				End()
@@ -146,7 +173,7 @@ func request(domain string, provider Provider) []error {
 			}
 			defer response.Body.Close()
 
-			checker(url, response, body, provider, endpoint)
+			checker(URL, response, body, provider, endpoint)
 		}
 	}
 	return nil
@@ -184,11 +211,10 @@ func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { 
 	return true, "Error, check code returned from last return statement" //  golang throws error without return at end, all return statements are inside if else so golang needs to make sure if function returns
 }
 
-func printFunc(provider Provider, domain string, endpoint string, statusCode int) {
+func printFunc(provider Provider, domain string, statusCode int) {
 	if ifVulnerable {
 		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
-		fmt.Println("Domain            -"+domain)		//also need to print headers but can't print provider.Headers directly as its [][]string, need to convert to string before.
-		fmt.Println("Endpoint          -"+ endpoint)
+		fmt.Println("Endpoint            -"+domain)
 		fmt.Println("Headers           -")
 		for _, header := range(provider.Headers){
 			fmt.Print("                   ")
@@ -207,7 +233,7 @@ func printFunc(provider Provider, domain string, endpoint string, statusCode int
 	}
 }
 
-func checker(url string, response gorequest.Response, body string, provider Provider, endpoint string) {
+func checker(URL string, response gorequest.Response, body string, provider Provider, endpoint string) {
 
 	var stringToCheck []string
 	var vulnerable bool
@@ -225,14 +251,14 @@ func checker(url string, response gorequest.Response, body string, provider Prov
 	wrapper := func(statusCode int) {
 		if provider.CheckIn == "responseBody" {
 			ifVulnerable, match = checkerLogic(body, stringToCheck)
-			printFunc(provider, url, endpoint, statusCode)
+			printFunc(provider, URL, statusCode)
 		} else {
 			var responseHeaders string
 			for headerName, value := range response.Header {
 				responseHeaders += headerName + ": " + value[0] + "\n"
 			}
 			ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck)
-			printFunc(provider, url, endpoint, statusCode)
+			printFunc(provider, URL, statusCode)
 		}
 	}
 
