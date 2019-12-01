@@ -213,23 +213,20 @@ func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { 
 
 func printFunc(provider Provider, domain string, statusCode int) {
 	if ifVulnerable {
-		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
-		fmt.Println("Endpoint            -"+domain)
-		fmt.Println("Headers           -")
+		fmt.Println("Issue detected: ", color(provider.Color, provider.Vulnerability))
+		fmt.Println("")
+		fmt.Println("Endpoint: "+domain)
+		fmt.Println("Headers: ")
+		fmt.Println("")
 		for _, header := range(provider.Headers){
 			fmt.Print("                   ")
 			fmt.Println(header[0],":",header[1])
 		}
-
-		fmt.Println("Request Body      -"+provider.Body)
-
+		fmt.Println("Request Body: "+provider.Body)
 		fmt.Println("")
-		fmt.Println("")
-
-		fmt.Println("Response Status Code   - "+strconv.Itoa(statusCode))
-
-		fmt.Println(provider.CheckIn+" contains -"+provider.CheckFor)
-		fmt.Println("          --------------------------------------------------------------------------------          ")
+		fmt.Println("Status Code: "+strconv.Itoa(statusCode))
+		fmt.Println(provider.CheckIn+" contains: "+provider.CheckFor)
+		fmt.Println("--------------------------------------------------------------------------------")
 	}
 }
 
