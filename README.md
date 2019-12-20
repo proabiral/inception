@@ -1,5 +1,3 @@
-**Please check beta branch for new features.**
-
 # Inception
 **Inception** is a highly configurable tool to check for whatever you like against any number of hosts.
 
