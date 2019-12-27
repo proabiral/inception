@@ -161,7 +161,9 @@ func request(domain string, provider Provider) []error {
 				End()
 
 			if err != nil {
+                if Verbose {
 				fmt.Println(err)
+                }
 				return nil
 			}
 			defer response.Body.Close()
