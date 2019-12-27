@@ -96,8 +96,13 @@ func printIfNotSilent(message string) {
 	}
 }
 
-func stringReplacer(URL string, value string) string{
-	u, _ := url.Parse(URL)
+func stringReplacer(URL string, value string) (string,error){
+	u, err := url.Parse(URL)
+	if err != nil {
+		printIfNotSilent(err.Error())
+		return "",err
+	}
+
 	fqdn:=u.Host
 	domain, _ := publicsuffix.EffectiveTLDPlusOne(fqdn)
 	tld, _ := publicsuffix.PublicSuffix(fqdn)
@@ -107,7 +112,7 @@ func stringReplacer(URL string, value string) string{
 		"$hostname", hostname)
 	// Replace all pairs.
 	result := r.Replace(value)
-	return result
+	return result,nil
 }
 
 func request(domain string, provider Provider) []error {
@@ -128,12 +133,15 @@ func request(domain string, provider Provider) []error {
 			URL = scheme + domain + endpoint
 		}
 
-		//replacing keywords {$domain, $host, $fqdn} from endpoints,vulnerability name, body and checkFor if any
+		//replacing keywords {$domain, $hostname, $fqdn} from endpoints,vulnerability name, body and checkFor if any
 		// need to find a way to replace headers
-		URL=stringReplacer(URL,URL)
-		provider.Vulnerability=stringReplacer(URL,provider.Vulnerability)
-		provider.Body = stringReplacer(URL,provider.Body)
-		provider.CheckFor = stringReplacer(URL,provider.CheckFor)
+		URL,err:=stringReplacer(URL,URL)
+		if (err != nil) {
+			continue
+		}
+		provider.Vulnerability,_=stringReplacer(URL,provider.Vulnerability)
+		provider.Body,_ = stringReplacer(URL,provider.Body)
+		provider.CheckFor,_ = stringReplacer(URL,provider.CheckFor)
 
 		//   Replacing header does not works
 		//for _,header := range provider.Headers {
@@ -153,6 +161,7 @@ func request(domain string, provider Provider) []error {
 				End()
 
 			if err != nil {
+				fmt.Println(err)
 				return nil
 			}
 			defer response.Body.Close()
@@ -214,23 +223,23 @@ func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { 
 func printFunc(provider Provider, domain string, statusCode int) {
 	if ifVulnerable {
 		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
-		fmt.Println("Endpoint            -"+domain)
-		fmt.Println("Headers           -")
+		fmt.Println("Endpoint          - "+domain)
+		fmt.Println("Headers           - ")
 		for _, header := range(provider.Headers){
 			fmt.Print("                   ")
 			fmt.Println(header[0],":",header[1])
 		}
 
-		fmt.Println("Request Body      -"+provider.Body)
+		fmt.Println("Request Body      - "+provider.Body)
 
 		fmt.Println("")
 		fmt.Println("")
 
-		fmt.Println("Response Status Code   - "+strconv.Itoa(statusCode))
+		fmt.Println("Response Status Code  - "+strconv.Itoa(statusCode))
 
-		fmt.Println(provider.CheckIn+" contains -"+provider.CheckFor)
+		fmt.Println(provider.CheckIn+" contains - "+provider.CheckFor)
 		fmt.Println("          --------------------------------------------------------------------------------          ")
-	}
+	}	
 }
 
 func checker(URL string, response gorequest.Response, body string, provider Provider, endpoint string) {
