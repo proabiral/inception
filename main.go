@@ -78,6 +78,7 @@ func readLines(file string) []string {
 	domains := []string{}
 	for scanner.Scan() {
 		domain := scanner.Text()
+		domain = strings.TrimSpace(domain)
 		domains = append(domains, domain)
 	}
 	return domains
