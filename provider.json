@@ -21,5 +21,23 @@
         "headers": [],
         "checkIn": "responseBody",
         "checkFor": "PHP Version&&&&PHP API&&&&PHP Extension"
+    },
+    {
+        "vulnerability": "WP-Config Exposed",
+        "method": "GET",
+        "color": "blue",
+        "body": "",
+        "endpoint": [
+            "/wp-config.php~",
+            "/wp-config.php.save",
+            "/wp-config.php_bak",
+            "/wp-config.php.bak",
+            "/wp-config.php.old",
+            "/wp-config.php.orig",
+            "/wp-config.php.original"
+        ],
+        "headers": [],
+        "checkIn": "responseBody",
+        "checkFor": ""
     }
 ]
