@@ -75,6 +75,18 @@
         "headers": [],
         "checkIn": "responseBody",
         "checkFor": "[core]"
+    },
+    {
+        "vulnerability": "Rails Database Config file",
+        "method": "GET",
+        "color": "red",
+        "body": "",
+        "endpoint": [
+            "/config/database.yml"
+        ],
+        "headers": [],
+        "checkIn": "responseBody",
+        "checkFor": "adapter:&&&&database:"
     }
 ]
 
