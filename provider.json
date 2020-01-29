@@ -8,7 +8,15 @@
             "/php.php",
             "/phpinfo.php",
             "/info.php",
-            "/_profiler/phpinfo"
+            "/_profiler/phpinfo",
+            "/infophp.php",
+            "/php_info.php",
+            "/test.php",
+            "/i.php",
+            "/asdf.php",
+            "/pinfo.php",
+            "/phpversion.php",
+            "/time.php"
         ],
         "headers": [],
         "checkIn": "responseBody",
