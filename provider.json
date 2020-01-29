@@ -38,6 +38,6 @@
         ],
         "headers": [],
         "checkIn": "responseBody",
-        "checkFor": ""
+        "checkFor": "DB_USER"
     }
 ]
