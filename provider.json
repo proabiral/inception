@@ -87,6 +87,19 @@
         "headers": [],
         "checkIn": "responseBody",
         "checkFor": "adapter:&&&&database:"
+    },
+    {
+        "vulnerability": "Magento Config",
+        "method": "GET",
+        "color": "red",
+        "body": "",
+        "endpoint": [
+            "/app/etc/local.xml",
+            "/store/app/etc/local.xml"
+        ],
+        "headers": [],
+        "checkIn": "responseBody",
+        "checkFor": "<config&&&&Mage"
     }
 ]
 
