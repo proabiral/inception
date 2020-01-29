@@ -51,6 +51,19 @@
         "headers": [],
         "checkIn": "responseBody",
         "checkFor": "CPU Usage&&&&Server Version&&&&Apache Server Status"
+    },    
+    {
+        "vulnerability": "Tomcat Server status is publicly viewable",
+        "method": "GET",
+        "color": "blue",
+        "body": "",
+        "endpoint": [
+            "/status?full=true"
+        ],
+        "headers": [],
+        "checkIn": "responseBody",
+        "checkFor": "Current thread count"
     }
 ]
+
 
