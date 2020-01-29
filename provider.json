@@ -63,6 +63,18 @@
         "headers": [],
         "checkIn": "responseBody",
         "checkFor": "Current thread count"
+    },
+    {
+        "vulnerability": ".git Exposed publicly",
+        "method": "GET",
+        "color": "red",
+        "body": "",
+        "endpoint": [
+            "/.git/config"
+        ],
+        "headers": [],
+        "checkIn": "responseBody",
+        "checkFor": "[core]"
     }
 ]
 
