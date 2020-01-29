@@ -112,6 +112,18 @@
         "headers": [],
         "checkIn": "responseBody",
         "checkFor": "APP_ENV=||||DB_PASSWORD="
+    },
+    {
+        "vulnerability": "Directory Listing Enabled",
+        "method": "GET",
+        "color": "blue",
+        "body": "",
+        "endpoint": [
+            "/"
+        ],
+        "headers": [],
+        "checkIn": "responseBody",
+        "checkFor": "<title>Directory listing for ||||<title>Index of "
     }
 ]
 
