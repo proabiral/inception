@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -16,6 +18,7 @@ import (
 	"strconv"
 	"net/url"
 	"golang.org/x/net/publicsuffix"
+	"github.com/cheggaaa/pb/v3"
 )
 
 type Provider struct {
@@ -70,11 +73,8 @@ func readFile(file string) string {
 	return content
 }
 
-func readLines(file string) []string {
-	domainSrc, err := os.Open(file)
-	errCheck(err)
-	defer domainSrc.Close() //defer executes at end of function
-	scanner := bufio.NewScanner(domainSrc)
+func readLines(r io.Reader) []string {
+	scanner := bufio.NewScanner(r)
 	domains := []string{}
 	for scanner.Scan() {
 		domain := scanner.Text()
@@ -83,6 +83,26 @@ func readLines(file string) []string {
 	}
 	return domains
 }
+
+func lineCounter(r io.Reader) (int, error) {
+	buf := make([]byte, 32*1024)
+	count := 0
+	lineSep := []byte{'\n'}
+
+	for {
+		c, err := r.Read(buf)
+		count += bytes.Count(buf[:c], lineSep)
+
+		switch {
+		case err == io.EOF:
+			return count, nil
+
+		case err != nil:
+			return count, err
+		}
+	}
+}
+
 
 func errCheck(err error) {
 	if err != nil {
@@ -116,7 +136,7 @@ func stringReplacer(URL string, value string) (string,error){
 	return result,nil
 }
 
-func request(domain string, provider Provider) []error {
+func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 	var URL string
 	if https {
 		scheme = "https://"
@@ -127,10 +147,12 @@ func request(domain string, provider Provider) []error {
 	// get array of Endpoint and loop endpoint here, so that same bug can be checked on multiple endpoint.
 	for _, endpoint := range provider.Endpoint {
 
+		bar.Increment()
+
 		if (strings.Contains(domain, "://")){
 			URL = domain + endpoint
 		}	else{
-		// if URL with http:// or https:// is not passed scheme is added
+			// if URL with http:// or https:// is not passed scheme is added
 			URL = scheme + domain + endpoint
 		}
 
@@ -162,9 +184,9 @@ func request(domain string, provider Provider) []error {
 				End()
 
 			if err != nil {
-                if Verbose {
-				fmt.Println(err)
-                }
+				if Verbose {
+					fmt.Println(err)
+				}
 				return nil
 			}
 			defer response.Body.Close()
@@ -242,7 +264,7 @@ func printFunc(provider Provider, domain string, statusCode int) {
 
 		fmt.Println(provider.CheckIn+" contains - "+provider.CheckFor)
 		fmt.Println("          --------------------------------------------------------------------------------          ")
-	}	
+	}
 }
 
 func checker(URL string, response gorequest.Response, body string, provider Provider, endpoint string) {
@@ -325,7 +347,30 @@ func main() {
 
 	printIfNotSilent("Reading Domains from list at " + DomainList)
 
-	domains := readLines(DomainList)
+	domainSrc, err := os.Open(DomainList)
+	errCheck(err)
+	defer domainSrc.Close() //defer executes at end of function
+	domainCount, err := lineCounter(domainSrc)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Encountered error while counting: %v", err)
+		os.Exit(1)
+	}
+
+	printIfNotSilent("Domain Count : " + strconv.Itoa(domainCount))
+	endpointCount:=0
+	for _, provider := range myProvider {
+		endpointCount+=len(provider.Endpoint)
+	}
+	printIfNotSilent("Total Number of Endpoints : "+ strconv.Itoa(endpointCount))
+
+	requestCount:=domainCount*endpointCount
+	printIfNotSilent("Total Number of Requests to be sent : "+ strconv.Itoa(requestCount))
+
+	domainSrc, err = os.Open(DomainList)
+	errCheck(err)
+	defer domainSrc.Close() //defer executes at end of function
+	domains := readLines(domainSrc)
 
 	hosts := make(chan string, Threads)
 	providerC := make(chan Provider)
@@ -333,6 +378,9 @@ func main() {
 	processGroup.Add(Threads)
 
 	printIfNotSilent("Running test cases against provided domains ..... ")
+
+	// create and start new bar
+	bar := pb.Full.Start(requestCount)
 
 	for i := 0; i < Threads; i++ {
 		go func() {
@@ -343,7 +391,7 @@ func main() {
 				if host == "" {
 					break
 				}
-				error := request(host, providerS)
+				error := request(host, providerS,bar)
 				if Verbose {
 					if error != nil {
 						fmt.Println(error)
@@ -353,6 +401,8 @@ func main() {
 			processGroup.Done()
 		}()
 	}
+
+
 
 	for _, provider := range myProvider {
 		for _, domain := range domains {
@@ -364,7 +414,6 @@ func main() {
 	close(hosts)
 	close(providerC)
 	processGroup.Wait()
-
+	bar.Finish()
 	printIfNotSilent("Completed")
-
 }
