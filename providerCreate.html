@@ -14,12 +14,12 @@
 
     const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
-    const responseBodyDiv="<div id=\"responseDiv\"> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"> {Case Sensitive ; Leave empty if you want to only send request} <br> <br> </div>"
+    const responseBodyDiv="<div id=\"responseDiv\"> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\">  <br> <br> </div>"
 
 
     const responseHeaderDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
-    const responseHeaderDiv="<div id=\"responseDiv\">What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\">{Case Sensitive ; Leave empty if you want to only send request}  <br> <br> </div>"
+    const responseHeaderDiv="<div id=\"responseDiv\">What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\">  <br> <br> </div>"
 
     function changeOption(xoxo){
         document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=xoxo.selectedIndex})
