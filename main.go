@@ -216,10 +216,10 @@ func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { //need a better logic to shorten this function
 
 	isCompleteMatch := true
-
 	matches := 0
-
+	checkAgainst=strings.ToLower(checkAgainst)
 	for _, checkfor := range stringToCheck {
+		checkfor=strings.ToLower(checkfor)
 		if strings.Contains(checkAgainst, checkfor) { //checkAgainst body , checkFor string like [core]
 			matches += 1
 			// returns immediately in case of |||| delimiter for match so that other test can be omitted
