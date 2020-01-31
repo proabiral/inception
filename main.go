@@ -50,13 +50,14 @@ func color(c string, text string) Value {
 var myProvider []Provider
 
 var (
-	DomainList   string
-	Threads      int
-	Verbose      bool
-	ProviderFile string
-	Timeout      int
-	Silent       bool
-	https        bool
+	DomainList       string
+	Threads          int
+	Verbose          bool
+	ProviderFile     string
+	Timeout          int
+	Silent           bool
+	https            bool
+	caseSensitive    bool
 )
 
 var (
@@ -217,9 +218,13 @@ func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { 
 
 	isCompleteMatch := true
 	matches := 0
-	checkAgainst=strings.ToLower(checkAgainst)
+	if !caseSensitive{
+		checkAgainst=strings.ToLower(checkAgainst)
+	}
 	for _, checkfor := range stringToCheck {
-		checkfor=strings.ToLower(checkfor)
+		if !caseSensitive{
+			checkfor=strings.ToLower(checkfor)
+		}
 		if strings.Contains(checkAgainst, checkfor) { //checkAgainst body , checkFor string like [core]
 			matches += 1
 			// returns immediately in case of |||| delimiter for match so that other test can be omitted
@@ -324,6 +329,7 @@ func main() {
 	flag.BoolVar(&Silent, "silent", false, "Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
 	flag.IntVar(&Timeout, "timeout", 10, "HTTP request Timeout")
 	flag.BoolVar(&https, "https", false, "force https (works only if scheme is not provided in domain list")
+	flag.BoolVar(&caseSensitive, "caseSensitive",false,"case sensitive checks")
 	flag.Parse()
 
 	printIfNotSilent(`
