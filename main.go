@@ -146,9 +146,7 @@ func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 	}
 
 	// get array of Endpoint and loop endpoint here, so that same bug can be checked on multiple endpoint.
-	for _, endpoint := range provider.Endpoint {
-
-		bar.Increment()
+	for count, endpoint := range provider.Endpoint {
 
 		if (strings.Contains(domain, "://")){
 			URL = domain + endpoint
@@ -187,8 +185,15 @@ func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 			if err != nil {
 				if Verbose {
 					fmt.Println(err)
+					fmt.Println("skipping other endpoints (if any) for this vulnerability")
+				}
+				incrementTimes:=len(provider.Endpoint)-count
+				for i := 0; i < incrementTimes; i++ {
+					bar.Increment() //since the loop is returned on error, other endpoints for the vulnerability are skipped, but the counter needs to be increased.
 				}
 				return nil
+			} else {
+				bar.Increment()
 			}
 			defer response.Body.Close()
 
@@ -204,7 +209,17 @@ func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 				End()
 
 			if err != nil {
+				if Verbose {
+					fmt.Println(err)
+					fmt.Println("skipping other endpoints (if any) for this vulnerability")
+				}
+				incrementTimes:=len(provider.Endpoint)-count
+				for i := 0; i < incrementTimes; i++ {
+					bar.Increment()
+				}
 				return nil
+			} else {
+				bar.Increment()
 			}
 			defer response.Body.Close()
 
