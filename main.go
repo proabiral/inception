@@ -296,20 +296,27 @@ func printFunc(provider Provider, domain string, statusCode int) {
 	if ifVulnerable {
 		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
 		fmt.Println("Endpoint          - "+domain)
-		fmt.Println("Headers           - ")
-		for _, header := range(provider.Headers){
-			fmt.Print("                   ")
-			fmt.Println(header[0],":",header[1])
+		if len(provider.Headers)>0{
+			fmt.Println("Headers           - ")
+			for _, header := range(provider.Headers){
+				fmt.Print("                   ")
+				fmt.Println(header[0],":",header[1])
+			}
 		}
 
-		fmt.Println("Request Body      - "+provider.Body)
+		if (provider.Body!="") {
+			fmt.Println("Request Body      - "+provider.Body)
+		}
+
 
 		fmt.Println("")
 		fmt.Println("")
 
 		fmt.Println("Response Status Code  - "+strconv.Itoa(statusCode))
 
-		fmt.Println(provider.CheckIn+" contains - "+provider.CheckFor)
+		if (provider.CheckFor!=""){
+			fmt.Println(provider.CheckIn+" contains - "+provider.CheckFor)
+		}
 		fmt.Println("          --------------------------------------------------------------------------------          ")
 	}
 }
