@@ -58,6 +58,7 @@ var (
 	Silent           bool
 	https            bool
 	caseSensitive    bool
+	noProgressBar	 bool
 )
 
 var (
@@ -66,6 +67,8 @@ var (
 	match        string
 	scheme       string
 )
+
+var bar *pb.ProgressBar
 
 func readFile(file string) string {
 	contentByte, err := ioutil.ReadFile(file)
@@ -137,7 +140,7 @@ func stringReplacer(URL string, value string) (string,error){
 	return result,nil
 }
 
-func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
+func request(domain string, provider Provider) []error {
 	var URL string
 	if https {
 		scheme = "https://"
@@ -188,12 +191,16 @@ func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 					fmt.Println("skipping other endpoints (if any) for this vulnerability")
 				}
 				incrementTimes:=len(provider.Endpoint)-count
-				for i := 0; i < incrementTimes; i++ {
-					bar.Increment() //since the loop is returned on error, other endpoints for the vulnerability are skipped, but the counter needs to be increased.
+				if !noProgressBar {
+					for i := 0; i < incrementTimes; i++ {
+						bar.Increment() //since the loop is returned on error, other endpoints for the vulnerability are skipped, but the counter needs to be increased.
+					}
 				}
 				return nil
 			} else {
-				bar.Increment()
+				if !noProgressBar {
+					bar.Increment()
+				}
 			}
 			defer response.Body.Close()
 
@@ -214,12 +221,16 @@ func request(domain string, provider Provider, bar *pb.ProgressBar) []error {
 					fmt.Println("skipping other endpoints (if any) for this vulnerability")
 				}
 				incrementTimes:=len(provider.Endpoint)-count
-				for i := 0; i < incrementTimes; i++ {
-					bar.Increment()
+				if !noProgressBar {
+					for i := 0; i < incrementTimes; i++ {
+						bar.Increment()
+					}
 				}
 				return nil
 			} else {
-				bar.Increment()
+				if !noProgressBar {
+					bar.Increment()
+				}
 			}
 			defer response.Body.Close()
 
@@ -345,6 +356,7 @@ func main() {
 	flag.IntVar(&Timeout, "timeout", 10, "HTTP request Timeout")
 	flag.BoolVar(&https, "https", false, "force https (works only if scheme is not provided in domain list")
 	flag.BoolVar(&caseSensitive, "caseSensitive",false,"case sensitive checks")
+	flag.BoolVar(&noProgressBar, "noProgressBar",false,"hide progress bar")
 	flag.Parse()
 
 	printIfNotSilent(`
@@ -401,8 +413,9 @@ func main() {
 	printIfNotSilent("Running test cases against provided domains ..... ")
 
 	// create and start new bar
-	bar := pb.Full.Start(requestCount)
-
+	if !noProgressBar{
+		bar = pb.Full.Start(requestCount)
+	}
 	for i := 0; i < Threads; i++ {
 		go func() {
 			for {
@@ -412,7 +425,7 @@ func main() {
 				if host == "" {
 					break
 				}
-				error := request(host, providerS,bar)
+				error := request(host, providerS)
 				if Verbose {
 					if error != nil {
 						fmt.Println(error)
@@ -435,6 +448,8 @@ func main() {
 	close(hosts)
 	close(providerC)
 	processGroup.Wait()
-	bar.Finish()
+	if !noProgressBar{
+		bar.Finish()
+	}
 	printIfNotSilent("Completed")
 }
