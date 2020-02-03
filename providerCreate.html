@@ -82,6 +82,8 @@
 
         json[jsonIndex].checkFor=""
 
+        json[jsonIndex].regexCheck=document.querySelector("#regexCheck").checked
+
         if(document.getElementById('checkIn').value == "responseBody") { 
             for (var i=0; i < y.length; i++){
                 if (i==0){
@@ -260,6 +262,12 @@
               What to check for in Response Body<input type="text" name="checkFor" class="response" id="checkFor" required> <input type="button" value="+" onclick="addResponseField()"> {Case Sensitive ; Leave empty if you want to only send request}  <br><br>
         </div>
     </div>
+
+    <div>
+       <input type="checkbox" id="regexCheck"> Perform Regex Check
+    </div>
+
+        <br>
 
    Severity to Assign
     <select name="color" id="color">

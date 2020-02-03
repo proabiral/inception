@@ -26,17 +26,24 @@ go get -u github.com/proabiral/inception
 ```
 ▶️  inception -h
     Usage of inception:
-      -d string
-          Path of list of domains to run against (default "/home/user/go/src/github.com/proabiral/inception/domains.txt")
-      -provider string
-          Path of provider file (default "/home/user/go/src/github.com/proabiral/inception/provider.json")
-      -t int
-          No of threads (default 200)
-      -silent
-    	Only prints when issue detected
-      -timeout int
-          HTTP request Timeout (default 10)
-      -v Verbose mode
+  -caseSensitive
+        case sensitive checks
+  -d string
+        Path of list of domains to run against (default "/home/proabiral/go/src/github.com/proabiral/inception/domains.txt")
+  -https
+        force https (works only if scheme is not provided in domain list
+  -noProgressBar
+        hide progress bar
+  -provider string
+        Path of provider file (default "/home/proabiral/go/src/github.com/proabiral/inception/provider.json")
+  -silent
+        Only prints when issue detected
+  -t int
+        No of threads (default 200)
+  -timeout int
+        HTTP request Timeout (default 10)
+  -v    Verbose mode
+
 ```
    
 #### Examples
@@ -64,24 +71,30 @@ Q. How do I add my own test cases?
 You can use [providerCreate.html](https://proabiral.github.io/inception/providerCreate.html) to generate JSON. Just fill in the details and JSON as shown below will be generated.
 ```
 [
-   {
-      "vulnerability":"Git Exposed publicly",
-      "sendIn":"url",
-      "payload":["/.git/config"],
-      "checkIn":"responseBody",
-      "checkFor":"[core]",
-      "color":"red"
-    },
-    {
-      "vulnerability": "XSS",
-      "sendIn": "url",
-      "color": "red",
-      "payload": [
-          "/?canary'\"><svg onload=alert(1)>"
-      ],
-      "checkIn": "responseBody",
-      "checkFor": "<svg onload=alert(1)>"
-    }
+       {
+           "vulnerability": "Server status is publicly viewable",
+           "method": "GET",
+           "color": "blue",
+           "body": "",
+           "endpoint": [
+               "/server-status"
+           ],
+           "headers": [],
+           "checkIn": "responseBody",
+           "checkFor": "CPU Usage&&&&Server Version&&&&Apache Server Status"
+       },    
+       {
+           "vulnerability": "Tomcat Server status is publicly viewable",
+           "method": "GET",
+           "color": "blue",
+           "body": "",
+           "endpoint": [
+               "/status?full=true"
+           ],
+           "headers": [],
+           "checkIn": "responseBody",
+           "checkFor": "Current thread count"
+       }
 ]
 ```
 Save the generated JSON to some file and then run the tool by providing the path to the json file with `-provider` option:
@@ -95,7 +108,7 @@ Also, `inception` because this is the first tool I am open sourcing.
 
 ### TODO
 1. Add more vulnerability checks
-2. Implement ReGex search in Response
+2. ~~Implement ReGex search in Response~~
 3. Add key to each test case in provider.json and option to select/ignore a test case
 4. Output result to file
 5. Randomize User-Agent

@@ -7,9 +7,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"io"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -32,6 +34,7 @@ type Provider struct {
 	CheckFor      string     `json:"checkFor"`
 	Color         string     `json:"color"`
 	StatusCode    []int      `json:"statusCode"`
+	RegexCheck	  bool		 `json:"regexCheck"`
 }
 
 func color(c string, text string) Value {
@@ -240,18 +243,31 @@ func request(domain string, provider Provider) []error {
 	return nil
 }
 
-func checkerLogic(checkAgainst string, stringToCheck []string) (bool, string) { //need a better logic to shorten this function
+func checkerLogic(checkAgainst string, stringToCheck []string, regexCheck bool) (bool, string) { //need a better logic to shorten this function
 
 	isCompleteMatch := true
+	matched := true
 	matches := 0
 	if !caseSensitive{
 		checkAgainst=strings.ToLower(checkAgainst)
 	}
 	for _, checkfor := range stringToCheck {
-		if !caseSensitive{
-			checkfor=strings.ToLower(checkfor)
+		if regexCheck{
+			var err error
+			if !caseSensitive{
+				checkfor="(?i)"+checkfor
+			}
+			matched, err = regexp.Match(checkfor, []byte(checkAgainst))
+			if err!=nil{
+				log.Println(err)
+			}
+		} else {
+			if !caseSensitive{
+				checkfor=strings.ToLower(checkfor)
+			}
+			matched = strings.Contains(checkAgainst,checkfor) //checkAgainst body , checkFor string like [core]
 		}
-		if strings.Contains(checkAgainst, checkfor) { //checkAgainst body , checkFor string like [core]
+		if matched {
 			matches += 1
 			// returns immediately in case of |||| delimiter for match so that other test can be omitted
 			if delimiter == "||||" {
@@ -315,14 +331,14 @@ func checker(URL string, response gorequest.Response, body string, provider Prov
 
 	wrapper := func(statusCode int) {
 		if provider.CheckIn == "responseBody" {
-			ifVulnerable, match = checkerLogic(body, stringToCheck)
+			ifVulnerable, match = checkerLogic(body, stringToCheck, provider.RegexCheck)
 			printFunc(provider, URL, statusCode)
 		} else {
 			var responseHeaders string
 			for headerName, value := range response.Header {
 				responseHeaders += headerName + ": " + value[0] + "\n"
 			}
-			ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck)
+			ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck, provider.RegexCheck)
 			printFunc(provider, URL, statusCode)
 		}
 	}
