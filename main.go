@@ -258,6 +258,10 @@ func checkerLogic(checkAgainst string, stringToCheck []string, regexCheck bool) 
 				checkfor="(?i)"+checkfor
 			}
 			matched, err = regexp.Match(checkfor, []byte(checkAgainst))
+			if matched{
+				re := regexp.MustCompile(checkfor)
+				checkfor=string(re.Find([]byte(checkAgainst)))  // for printing what regex matched
+			}
 			if err!=nil{
 				log.Println(err)
 			}
@@ -287,12 +291,12 @@ func checkerLogic(checkAgainst string, stringToCheck []string, regexCheck bool) 
 	}
 
 	if isCompleteMatch == true {
-		return true, "all check"
+		return true, "all provided checks"
 	}
 	return true, "Error, check code returned from last return statement" //  golang throws error without return at end, all return statements are inside if else so golang needs to make sure if function returns
 }
 
-func printFunc(provider Provider, domain string, statusCode int) {
+func printFunc(provider Provider, domain string, statusCode int, match string) {
 	if ifVulnerable {
 		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
 		fmt.Println("Endpoint          - "+domain)
@@ -308,14 +312,13 @@ func printFunc(provider Provider, domain string, statusCode int) {
 			fmt.Println("Request Body      - "+provider.Body)
 		}
 
-
 		fmt.Println("")
 		fmt.Println("")
 
 		fmt.Println("Response Status Code  - "+strconv.Itoa(statusCode))
 
 		if (provider.CheckFor!=""){
-			fmt.Println(provider.CheckIn+" contains - "+provider.CheckFor)
+			fmt.Println(provider.CheckIn+" contains - "+match)
 		}
 		fmt.Println("          --------------------------------------------------------------------------------          ")
 	}
@@ -339,14 +342,14 @@ func checker(URL string, response gorequest.Response, body string, provider Prov
 	wrapper := func(statusCode int) {
 		if provider.CheckIn == "responseBody" {
 			ifVulnerable, match = checkerLogic(body, stringToCheck, provider.RegexCheck)
-			printFunc(provider, URL, statusCode)
+			printFunc(provider, URL, statusCode, match)
 		} else {
 			var responseHeaders string
 			for headerName, value := range response.Header {
 				responseHeaders += headerName + ": " + value[0] + "\n"
 			}
 			ifVulnerable, match = checkerLogic(responseHeaders, stringToCheck, provider.RegexCheck)
-			printFunc(provider, URL, statusCode)
+			printFunc(provider, URL, statusCode, match)
 		}
 	}
 
