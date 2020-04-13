@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <script> 
 
     const hintText="{{ Fill details above for new test case }}"
 
-    const PayloadHeaderDiv="<div id=\"payloadHeaderDiv\"> Header Name <input type=\"text\" name=\"payload1\" required class=\"payload\">  Header Value <input type=\"text\" name=\"payload2\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addHeaderField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br> <br> </div>"
+    const PayloadHeaderDiv="<br><div id=\"payloadHeaderDiv\"> <div class=\"row\"> <div class=\"col\"> Header Name <input class=\"form-control\"  type=\"text\" name=\"payload1\" required class=\"payload\"> </div> <div class=\"col\">  Header Value <input type=\"text\" class=\"form-control\"  name=\"payload2\" class=\"payload\" required></div><div class=\"col-2\"> <br><input type=\"button\"  class=\"btn\" value=\"+\" onclick=\"addHeaderField()\">   <input id=\"minusbuttonID\"  class=\"btn\" type=\"button\" value=\"-\" onclick=\"minusButton(this.parentElement)\"></div> </div>"
 
-    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> Endpoint where request will be send: <input type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required><input type=\"button\" value=\"+\" onclick=\"addEndpointField()\"><input type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+    const PayloadBodyDiv="<div id=\"payloadBodyDiv\"> <div class=\"row\">  <div class=\"col\"> <input class=\"form-control\" type=\"text\" name=\"payload\" value=\"/\" class=\"payload\" required> </div> <div class=\"col-2\"><input type=\"button\" class=\"btn\" value=\"+\" onclick=\"addEndpointField()\"> <input type=\"button\" class=\"btn\" value=\"-\" onclick=\"minusButton(this.parentElement)\"> <br> <br> </div></div></div>"
 
-    const StatusCodeBodyDiv="  <div id=\"StatusCodeBodyDiv\">   Status Code : <input type=\"number\" id=\"statusCode\"> <input type=\"button\" value=\"+\" onclick=\"addStatuCodeField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"><br>   </div>"
+    const StatusCodeBodyDiv="    <div id=\"StatusCodeBodyDiv\">  <div class=\"row\">    <div class=\"col-2\">Status Code : </div> <div class=\"col\"> <input class=\"form-control\" type=\"number\" id=\"statusCode\"></div><div class=\"col-2\"> <input type=\"button\" class=\"btn\" value=\"+\" onclick=\"addStatuCodeField()\">   <input id=\"minusbuttonID\" class=\"btn\" type=\"button\" value=\"-\" onclick=\"minusButton(this.parentElement)\"><br> <br></div></div>  </div>"
 
-    const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
+    const responseBodyDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Body <div class=\"row\"> <div class=\"col\"> <input type=\"text\" class=\"form-control\"  name=\"payload1\" class=\"response\"> </div> <div class=\"col-2\"> <input type=\"button\" class=\"btn\" value=\"+\" onclick=\"addResponseField()\">   <input id=\"minusbuttonID\" class=\"btn\" type=\"button\" value=\"-\" onclick=\"minusButton(this.parentElement.parentElement)\"> <br> <br> </div> </div></div>"
 
-    const responseBodyDiv="<div id=\"responseDiv\"> What to check for in Response Body <input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"button\" value=\"+\" onclick=\"addResponseField()\">  <br> <br> </div>"
+    const responseBodyDiv="<div id=\"responseDiv\"> What to check for in Response Body <input type=\"text\" class=\"form-control\" name=\"payload1\" class=\"response\"> <input type=\"button\" class=\"btn\" value=\"+\" onclick=\"addResponseField()\">  <br> <br> </div>"
 
+    const responseHeaderDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" class=\"btn\" value=\"+\" onclick=\"addResponseField()\">   <input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
 
-    const responseHeaderDivS="<div id=\"responseDiv\"><select onchange=\"changeOption(this)\" class=\"delimiter\"> <option value=\"||||\">OR</option>    <option value=\"&&&&\">AND</option></select> <br><br> What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\"><input id=\"minusbuttonID\" type=\"button\" value=\"-\" onclick=\"minusButton(this)\"> <br> <br> </div>"
-
-    const responseHeaderDiv="<div id=\"responseDiv\">What to check for in Response Header<input type=\"text\" name=\"payload1\" class=\"response\"> <input type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" value=\"+\" onclick=\"addResponseField()\">  <br> <br> </div>"
+    const responseHeaderDiv="<div id=\"responseDiv\">What to check for in Response Header<input type=\"text\" class=\"form-control\"  name=\"payload1\" class=\"response\"> <input  class=\"form-control\"  type=\"text\" name=\"payload2\" class=\"response\">  <input type=\"button\" class=\"btn\" value=\"+\" onclick=\"addResponseField()\">  <br> <br> </div>"
 
     function changeOption(xoxo){
         document.querySelectorAll(".delimiter").forEach(function(element) {element.selectedIndex=xoxo.selectedIndex})
@@ -212,87 +210,169 @@
 
 <body onload="json=new Array();">
     <h1>
-        Create json file for provider
+        Create Fingerprints for <a href="https://github.com/proabiral/inception">inception</a>
     </h1>
+<br>
+    <form class="form-horizontal">
 
-    <form>
-    Vulnerability Name:
-    <input type="text" name="vulnerability" id="vulnerability" required> <br><br>
-
-
-    Method
-    <select name="method" id="method">
-        <option value="GET">GET</option>
-        <option value="HEAD">HEAD</option>
-        <option value="POST">POST</option>
-        <option value="PUT">PUT</option>
-        <option value="DELETE">DELETE</option>
-    </select> <br><br>
-
-    <div id="endPointPDiv">
-        <div id="endpointDiv">
-            Endpoint where request will be send:
-            <input type="text" class="payload" value="/" required> <input type="button" value="+" onclick="addEndpointField()"> <br><br>
+        <div class="form-group">
+             <label for="Vulnerability Name"> Vulnerability Name:  </label>
+             <input type="text" name="vulnerability" placeholder="PHP info Page disclosure" id="vulnerability" required class="form-control">
         </div>
-    </div>
 
-    <div id="headerPDiv">
-        Headers to be send {leave empty if you don't want any custom header}
-        <div id="headerDiv"> Header Name <input type="text" name="payload1">  Header Value <input type="text" name="payload2" class="payload"><input type="button" value="+" onclick="addHeaderField()"><input id="minusbuttonID" type="button" value="-" onclick="minusButton(this)" style="display: none;"><br> <br> 
+        <div class="form-group">
+            <label for="Method"> Method :  </label>
+            <select name="method" id="method" class="form-control">
+                <option value="GET">GET</option>
+                <option value="HEAD">HEAD</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
         </div>
-    </div>
 
-    Body to be send in request<br> <textarea rows="10" cols="80" id="postBody" placeholder='Place post data as follows ; make sure to use appropriate Content-Type: header if needed;&#10;{"username":"admin","password":"secret"} &#10;or&#10;field1=value1&field2=value2&#10;or&#10;--boundary &#10;Content-Disposition: form-data; name="field1" &#10;&#10;value1 &#10;--boundary &#10;Content-Disposition: form-data; name="field2"; filename="example.txt" &#10;'></textarea> <br><br>
-
-  <div id="StatusCodeBodyDiv">
-   Status Code : <input type="number" id="statusCode"> <input type="button" value="+" onclick="addStatuCodeField()">
-
-  </div>
-        {Status code that need to be matched for vulnerability detection, leave empty if status code check is not needed.}
-        <br><br>
-
-   Check in
-    <select name="checkIn" id="checkIn" onchange="responseDiv()">
-        <option value="responseBody">Response Body</option>
-        <option value="responseHeader">Response Header</option>
-    </select> <br><br> <!-- drop down responseBody -->
-
-    <div id="responsePdiv">
-        <div id="responseDiv">
-              What to check for in Response Body<input type="text" name="checkFor" class="response" id="checkFor" required> <input type="button" value="+" onclick="addResponseField()"> {Case Sensitive ; Leave empty if you want to only send request}  <br><br>
+        <div class="form-group">
+            <div id="endPointPDiv">
+                <div id="endpointDiv">
+                    <label for="Endpoint">
+                    Endpoint where request will be send:
+                    </label>
+                    <div class="row">
+                        <div class="col">
+                            <input class="form-control" type="text"  placeholder="/phpinfo.php" class="payload" value="/" required>
+                        </div>
+                        <div class="col-2">
+                            <input type="button" class="btn" value="+" onclick="addEndpointField()"> <br><br>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+
+        <div class="form-group">
+            <div id="headerPDiv">
+                Headers to be send {leave empty if you don't want any custom header}
+                <div id="headerDiv">
+                    <div class="row">
+                        <div class="col">
+                           <label>Header Name</label>
+                            <input type="text" name="payload1" class="form-control" placeholder="Referer">
+                        </div>
+                        <div class="col">
+                            <label>
+                            Header Value
+                            </label>
+                            <input class="form-control" type="text" name="payload2" class="payload" placeholder="https://google.com">
+                        </div>
+                        <div class="col-2">
+                            <br>
+                            <input type="button" class="btn" value="+" onclick="addHeaderField()">
+                            <input id="minusbuttonID" type="button" value="-" onclick="minusButton(this)" style="display: none;">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="form-group">
+                <br>
+               <label> Body to be send in request </label>
+                <textarea class="form-control" rows="11" cols="80" id="postBody" placeholder='Place post data as follows ; make sure to use appropriate Content-Type: header if needed;&#10;{"username":"admin","password":"secret"} &#10;or&#10;field1=value1&field2=value2&#10;or&#10;--boundary &#10;Content-Disposition: form-data; name="field1" &#10;&#10;value1 &#10;--boundary &#10;Content-Disposition: form-data; name="field2"; filename="example.txt" &#10;'></textarea>
+                <br>
+            </div>
+
+            <div class="form-group">
+                  <div id="StatusCodeBodyDiv">
+                      <div class="row">
+                          <div class="col-2">
+                              <label>
+                                  Status Code :
+                              </label>
+                          </div>
+                          <div class="col">
+                            <input class="form-control" type="number" id="statusCode" placeholder="200">
+                          </div>
+                          <div class="col-2">
+                                  <input type="button" class="btn" value="+" onclick="addStatuCodeField()"><br><br>
+                          </div>
+
+                      </div>
+
+            </div>
+                {Status code that need to be matched for vulnerability detection, leave empty if status code check is not needed.}
+
+                <br><br>
+
+            <div class="form-group">
+                <label>
+                    Check in :
+                </label>
+
+                <select class="form-control" name="checkIn" id="checkIn" onchange="responseDiv()">
+                    <option value="responseBody">Response Body</option>
+                    <option value="responseHeader">Response Header</option>
+                </select>  <!-- drop down responseBody -->
+            </div>
+
+            <div class="form-group">
+                <div id="responsePdiv">
+                    <div id="responseDiv">
+                        <div class="row">
+                            <div class="col">
+                            <label>What to check for in Response Body</label>
+                            <input class="form-control" placeholder="PHP Version" type="text" name="checkFor" class="response" id="checkFor" required>
+                            </div>
+                            <div class="col-2">
+                                <br>
+                                <input type="button" class="btn" value="+" onclick="addResponseField()">
+                            </div>
+                        </div>
+                        {Case Sensitive ; Leave empty if you want to only send request}  <br><br>
+                    </div>
+                </div>
+            </div>
+
+    <div class="form-check">
+       <input class="form-check-input" type="checkbox" id="regexCheck">
+        <label for="regexCheck" class="form-check-label">
+            Perform Regex Check
+        <label>
     </div>
 
-    <div>
-       <input type="checkbox" id="regexCheck"> Perform Regex Check
-    </div>
 
-        <br>
+            <div class="form-group">
+                <br>
+                <label>
+                    Severity to Assign
+                </label>
 
-   Severity to Assign
-    <select name="color" id="color">
-        <option value="blue">Low</option>
-        <option value="yellow">Medium</option>
-        <option value="red">High</option>
-    </select> <br><br>
+                <select name="color" id="color" class="form-control">
+                    <option value="blue">Low</option>
+                    <option value="yellow">Medium</option>
+                    <option value="red">High</option>
+                </select>
+            </div>
 
-    <input type="button" value="Add more vulnerabilities" onclick="moreVulnerability(this);">
+
+    <input type="button" class="btn" value="Add more vulnerabilities" onclick="moreVulnerability(this);">
 
 <div id="hint"> </div>
     <br> <br>
 
-    <input type="button" value="Generate JSON" onclick="jsonPrint(this)">
+    <input type="button" class="btn" value="Generate JSON" onclick="jsonPrint(this)">
 
-    <br>
+    <br> <br>
 
     </form>
 
-    <textarea id="jsonOutput" rows="80" cols="90">
+    <textarea id="jsonOutput" rows="40" cols="90">
 
     </textarea>
 
 </body>
 
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 
 <style>
