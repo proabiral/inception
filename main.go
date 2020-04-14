@@ -7,20 +7,20 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
+	"github.com/cheggaaa/pb/v3"
+	. "github.com/logrusorgru/aurora"
+	"github.com/proabiral/gorequest"
+	"golang.org/x/net/publicsuffix"
 	"io"
 	"io/ioutil"
+	"log"
+	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
-	. "github.com/logrusorgru/aurora"
-	"github.com/proabiral/gorequest"
-	"strconv"
-	"net/url"
-	"golang.org/x/net/publicsuffix"
-	"github.com/cheggaaa/pb/v3"
 )
 
 type Provider struct {
@@ -34,7 +34,11 @@ type Provider struct {
 	CheckFor      string     `json:"checkFor"`
 	Color         string     `json:"color"`
 	StatusCode    []int      `json:"statusCode"`
-	RegexCheck	  bool		 `json:"regexCheck"`
+	RegexCheck    bool       `json:"regexCheck"`
+	ContentLength struct {
+		Length   int    `json:"length"`
+		Operator string `json:"operator"`
+	} `json:"contentLength"`
 }
 
 func color(c string, text string) Value {
@@ -53,15 +57,15 @@ func color(c string, text string) Value {
 var myProvider []Provider
 
 var (
-	DomainList       string
-	Threads          int
-	Verbose          bool
-	ProviderFile     string
-	Timeout          int
-	Silent           bool
-	https            bool
-	caseSensitive    bool
-	noProgressBar	 bool
+	DomainList    string
+	Threads       int
+	Verbose       bool
+	ProviderFile  string
+	Timeout       int
+	Silent        bool
+	https         bool
+	caseSensitive bool
+	noProgressBar bool
 )
 
 var (
@@ -110,7 +114,6 @@ func lineCounter(r io.Reader) (int, error) {
 	}
 }
 
-
 func errCheck(err error) {
 	if err != nil {
 		fmt.Println(err)
@@ -124,14 +127,14 @@ func printIfNotSilent(message string) {
 	}
 }
 
-func stringReplacer(URL string, value string) (string,error){
+func stringReplacer(URL string, value string) (string, error) {
 	u, err := url.Parse(URL)
 	if err != nil {
 		printIfNotSilent(err.Error())
-		return "",err
+		return "", err
 	}
 
-	fqdn:=u.Host
+	fqdn := u.Host
 	domain, _ := publicsuffix.EffectiveTLDPlusOne(fqdn)
 	tld, _ := publicsuffix.PublicSuffix(fqdn)
 	hostname := strings.Replace(domain, "."+tld, "", -1)
@@ -140,7 +143,7 @@ func stringReplacer(URL string, value string) (string,error){
 		"$hostname", hostname)
 	// Replace all pairs.
 	result := r.Replace(value)
-	return result,nil
+	return result, nil
 }
 
 func request(domain string, provider Provider) []error {
@@ -154,22 +157,22 @@ func request(domain string, provider Provider) []error {
 	// get array of Endpoint and loop endpoint here, so that same bug can be checked on multiple endpoint.
 	for count, endpoint := range provider.Endpoint {
 
-		if (strings.Contains(domain, "://")){
+		if strings.Contains(domain, "://") {
 			URL = domain + endpoint
-		}	else{
+		} else {
 			// if URL with http:// or https:// is not passed scheme is added
 			URL = scheme + domain + endpoint
 		}
 
 		//replacing keywords {$domain, $hostname, $fqdn} from endpoints,vulnerability name, body and checkFor if any
 		// need to find a way to replace headers
-		URL,err:=stringReplacer(URL,URL)
-		if (err != nil) {
+		URL, err := stringReplacer(URL, URL)
+		if err != nil {
 			continue
 		}
-		provider.Vulnerability,_=stringReplacer(URL,provider.Vulnerability)
-		provider.Body,_ = stringReplacer(URL,provider.Body)
-		provider.CheckFor,_ = stringReplacer(URL,provider.CheckFor)
+		provider.Vulnerability, _ = stringReplacer(URL, provider.Vulnerability)
+		provider.Body, _ = stringReplacer(URL, provider.Body)
+		provider.CheckFor, _ = stringReplacer(URL, provider.CheckFor)
 
 		//   Replacing header does not works
 		//for _,header := range provider.Headers {
@@ -193,7 +196,7 @@ func request(domain string, provider Provider) []error {
 					fmt.Println(err)
 					fmt.Println("skipping other endpoints (if any) for this vulnerability")
 				}
-				incrementTimes:=len(provider.Endpoint)-count
+				incrementTimes := len(provider.Endpoint) - count
 				if !noProgressBar {
 					for i := 0; i < incrementTimes; i++ {
 						bar.Increment() //since the loop is returned on error, other endpoints for the vulnerability are skipped, but the counter needs to be increased.
@@ -223,7 +226,7 @@ func request(domain string, provider Provider) []error {
 					fmt.Println(err)
 					fmt.Println("skipping other endpoints (if any) for this vulnerability")
 				}
-				incrementTimes:=len(provider.Endpoint)-count
+				incrementTimes := len(provider.Endpoint) - count
 				if !noProgressBar {
 					for i := 0; i < incrementTimes; i++ {
 						bar.Increment()
@@ -248,28 +251,28 @@ func checkerLogic(checkAgainst string, stringToCheck []string, regexCheck bool) 
 	isCompleteMatch := true
 	matched := true
 	matches := 0
-	if !caseSensitive{
-		checkAgainst=strings.ToLower(checkAgainst)
+	if !caseSensitive {
+		checkAgainst = strings.ToLower(checkAgainst)
 	}
 	for _, checkfor := range stringToCheck {
-		if regexCheck{
+		if regexCheck {
 			var err error
-			if !caseSensitive{
-				checkfor="(?i)"+checkfor
+			if !caseSensitive {
+				checkfor = "(?i)" + checkfor
 			}
 			matched, err = regexp.Match(checkfor, []byte(checkAgainst))
-			if matched{
+			if matched {
 				re := regexp.MustCompile(checkfor)
-				checkfor=string(re.Find([]byte(checkAgainst)))  // for printing what regex matched
+				checkfor = string(re.Find([]byte(checkAgainst))) // for printing what regex matched
 			}
-			if err!=nil{
+			if err != nil {
 				log.Println(err)
 			}
 		} else {
-			if !caseSensitive{
-				checkfor=strings.ToLower(checkfor)
+			if !caseSensitive {
+				checkfor = strings.ToLower(checkfor)
 			}
-			matched = strings.Contains(checkAgainst,checkfor) //checkAgainst body , checkFor string like [core]
+			matched = strings.Contains(checkAgainst, checkfor) //checkAgainst body , checkFor string like [core]
 		}
 		if matched {
 			matches += 1
@@ -299,26 +302,26 @@ func checkerLogic(checkAgainst string, stringToCheck []string, regexCheck bool) 
 func printFunc(provider Provider, domain string, statusCode int, match string) {
 	if ifVulnerable {
 		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
-		fmt.Println("Endpoint          - "+domain)
-		if len(provider.Headers)>0{
+		fmt.Println("Endpoint          - " + domain)
+		if len(provider.Headers) > 0 {
 			fmt.Println("Headers           - ")
-			for _, header := range(provider.Headers){
+			for _, header := range provider.Headers {
 				fmt.Print("                   ")
-				fmt.Println(header[0],":",header[1])
+				fmt.Println(header[0], ":", header[1])
 			}
 		}
 
-		if (provider.Body!="") {
-			fmt.Println("Request Body      - "+provider.Body)
+		if provider.Body != "" {
+			fmt.Println("Request Body      - " + provider.Body)
 		}
 
 		fmt.Println("")
 		fmt.Println("")
 
-		fmt.Println("Response Status Code  - "+strconv.Itoa(statusCode))
+		fmt.Println("Response Status Code  - " + strconv.Itoa(statusCode))
 
-		if (provider.CheckFor!=""){
-			fmt.Println(provider.CheckIn+" contains - "+match)
+		if provider.CheckFor != "" {
+			fmt.Println(provider.CheckIn + " contains - " + match)
 		}
 		fmt.Println("          --------------------------------------------------------------------------------          ")
 	}
@@ -327,7 +330,6 @@ func printFunc(provider Provider, domain string, statusCode int, match string) {
 func checker(URL string, response gorequest.Response, body string, provider Provider, endpoint string) {
 
 	var stringToCheck []string
-	var vulnerable bool
 
 	//get status code to match from provider, if nostatus code present leave as it is. If present, status code must be matched to procced furhter check.....
 
@@ -353,20 +355,37 @@ func checker(URL string, response gorequest.Response, body string, provider Prov
 		}
 	}
 
-	if (len(provider.StatusCode)==0){//when not defined.
-		wrapper(response.StatusCode) // check for stings defined in provider
-	} else {
-		// loop through provider.StatusCode and call wrapper and end the loop if any match
-		for _, statusCode := range provider.StatusCode {
-			if statusCode == response.StatusCode {
-				wrapper(statusCode) // check for stings defined in provider
-				vulnerable=true
-				break
+	statusCodeCheck := func() {
+		if len(provider.StatusCode) == 0 { //when not defined.
+
+			wrapper(response.StatusCode) // check for stings defined in provider
+		} else {
+			// loop through provider.StatusCode and call wrapper and end the loop if any match
+			for _, statusCode := range provider.StatusCode {
+				if statusCode == response.StatusCode {
+					wrapper(statusCode) // check for stings defined in provider
+					break
+				}
 			}
 		}
-		if !vulnerable {
-			ifVulnerable, match = false, "not vulnerable" //if statusCode does not match ; not vulnerable
+	}
+
+	if provider.ContentLength.Length != 0 {
+		if provider.ContentLength.Operator == "<" {
+			if provider.ContentLength.Length < int(response.ContentLength) {
+				statusCodeCheck()
+			}
+		} else if provider.ContentLength.Operator == "=" {
+			if provider.ContentLength.Length == int(response.ContentLength) {
+				statusCodeCheck()
+			}
+		} else if provider.ContentLength.Operator == ">" {
+			if provider.ContentLength.Length > int(response.ContentLength) {
+				statusCodeCheck()
+			}
 		}
+	} else {
+		statusCodeCheck()
 	}
 }
 
@@ -381,8 +400,8 @@ func main() {
 	flag.BoolVar(&Silent, "silent", false, "Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
 	flag.IntVar(&Timeout, "timeout", 10, "HTTP request Timeout")
 	flag.BoolVar(&https, "https", false, "force https (works only if scheme is not provided in domain list")
-	flag.BoolVar(&caseSensitive, "caseSensitive",false,"case sensitive checks")
-	flag.BoolVar(&noProgressBar, "noProgressBar",false,"hide progress bar")
+	flag.BoolVar(&caseSensitive, "caseSensitive", false, "case sensitive checks")
+	flag.BoolVar(&noProgressBar, "noProgressBar", false, "hide progress bar")
 	flag.Parse()
 
 	printIfNotSilent(`
@@ -417,14 +436,14 @@ func main() {
 	}
 
 	printIfNotSilent("Domain Count : " + strconv.Itoa(domainCount))
-	endpointCount:=0
+	endpointCount := 0
 	for _, provider := range myProvider {
-		endpointCount+=len(provider.Endpoint)
+		endpointCount += len(provider.Endpoint)
 	}
-	printIfNotSilent("Total Number of Endpoints : "+ strconv.Itoa(endpointCount))
+	printIfNotSilent("Total Number of Endpoints : " + strconv.Itoa(endpointCount))
 
-	requestCount:=domainCount*endpointCount
-	printIfNotSilent("Total Number of Requests to be sent : "+ strconv.Itoa(requestCount))
+	requestCount := domainCount * endpointCount
+	printIfNotSilent("Total Number of Requests to be sent : " + strconv.Itoa(requestCount))
 
 	domainSrc, err = os.Open(DomainList)
 	errCheck(err)
@@ -439,7 +458,7 @@ func main() {
 	printIfNotSilent("Running test cases against provided domains ..... ")
 
 	// create and start new bar
-	if !noProgressBar{
+	if !noProgressBar {
 		bar = pb.Full.Start(requestCount)
 	}
 	for i := 0; i < Threads; i++ {
@@ -462,8 +481,6 @@ func main() {
 		}()
 	}
 
-
-
 	for _, provider := range myProvider {
 		for _, domain := range domains {
 			hosts <- domain
@@ -474,7 +491,7 @@ func main() {
 	close(hosts)
 	close(providerC)
 	processGroup.Wait()
-	if !noProgressBar{
+	if !noProgressBar {
 		bar.Finish()
 	}
 	printIfNotSilent("Completed")
