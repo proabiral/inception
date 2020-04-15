@@ -12,6 +12,7 @@ import (
 	"github.com/proabiral/gorequest"
 	"github.com/proabiral/inception/helpers"
 	"golang.org/x/net/publicsuffix"
+	"gopkg.in/go-playground/validator.v10"
 	"io"
 	"io/ioutil"
 	"log"
@@ -25,10 +26,10 @@ import (
 )
 
 type Provider struct {
-	Vulnerability string     `json:"vulnerability"`
+	Vulnerability string     `json:"vulnerability" validate:"required"`
 	Method        string     `json:"method"`
 	Body          string     `json:"body"`
-	Endpoint      []string   `json:"endpoint"`
+	Endpoint      []string   `json:"endpoint" validate:"required"`
 	SendIn        string     `json:"sendIn"`
 	Headers       [][]string `json:"headers"`
 	CheckIn       string     `json:"checkIn"`
@@ -447,6 +448,15 @@ func main() {
 
 	err := json.Unmarshal([]byte(contentJson), &myProvider)
 	errCheck(err)
+
+	validate := validator.New()
+	for i, _ := range myProvider {
+		err = validate.Struct(myProvider[i])
+		if err != nil {
+			log.Printf("Error on index number %d of given JSON Fingerprint Array", i)
+		}
+		errCheck(err)
+	}
 
 	printIfNotSilent("Reading Domains from list at " + DomainList)
 
