@@ -10,6 +10,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	. "github.com/logrusorgru/aurora"
 	"github.com/proabiral/gorequest"
+	"github.com/proabiral/inception/helpers"
 	"golang.org/x/net/publicsuffix"
 	"io"
 	"io/ioutil"
@@ -41,6 +42,15 @@ type Provider struct {
 	} `json:"contentLength"`
 }
 
+type VulnerabilityJson struct {
+	Vulnerability    string `json:"vulnerability"`
+	Endpoint         string `json:"endpoint"`
+	StatusCode       int    `json:"statusCode"`
+	ResponseContains string `json:"responseContains,omitempty"`
+}
+
+var JsonOutput []VulnerabilityJson
+
 func color(c string, text string) Value {
 	switch c {
 	case "blue":
@@ -61,6 +71,7 @@ var (
 	Threads       int
 	Verbose       bool
 	ProviderFile  string
+	OutputFile    string
 	Timeout       int
 	Silent        bool
 	https         bool
@@ -300,9 +311,18 @@ func checkerLogic(checkAgainst string, stringToCheck []string, regexCheck bool) 
 }
 
 func printFunc(provider Provider, domain string, statusCode int, match string) {
+
 	if ifVulnerable {
+
 		fmt.Println("Issue detected    -", color(provider.Color, provider.Vulnerability))
+
+		var vulJson VulnerabilityJson
+		vulJson.Vulnerability = provider.Vulnerability
+		vulJson.Endpoint = domain
+		vulJson.StatusCode = statusCode
+
 		fmt.Println("Endpoint          - " + domain)
+
 		if len(provider.Headers) > 0 {
 			fmt.Println("Headers           - ")
 			for _, header := range provider.Headers {
@@ -321,9 +341,13 @@ func printFunc(provider Provider, domain string, statusCode int, match string) {
 		fmt.Println("Response Status Code  - " + strconv.Itoa(statusCode))
 
 		if provider.CheckFor != "" {
+			vulJson.ResponseContains = match
 			fmt.Println(provider.CheckIn + " contains - " + match)
 		}
+
 		fmt.Println("          --------------------------------------------------------------------------------          ")
+
+		JsonOutput = append(JsonOutput, vulJson)
 	}
 }
 
@@ -395,6 +419,7 @@ func main() {
 
 	flag.IntVar(&Threads, "t", 200, "No of threads")
 	flag.StringVar(&ProviderFile, "provider", path+"provider.json", "Path of provider file")
+	flag.StringVar(&OutputFile, "o", "", "File to write JSON result")
 	flag.StringVar(&DomainList, "d", path+"domains.txt", "Path of list of domains to run against")
 	flag.BoolVar(&Verbose, "v", false, "Verbose mode")
 	flag.BoolVar(&Silent, "silent", false, "Only prints when issue detected") //using silent and verbose together will print domains and payloads but will supress message like Reading from file
@@ -494,5 +519,16 @@ func main() {
 	if !noProgressBar {
 		bar.Finish()
 	}
+
+	b, err := json.MarshalIndent(JsonOutput, "", "    ")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if OutputFile != "" {
+		helpers.WriteFile(b, OutputFile)
+		printIfNotSilent("Result written to file " + OutputFile)
+	}
+
 	printIfNotSilent("Completed")
 }
