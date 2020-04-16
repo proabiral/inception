@@ -1,15 +1,22 @@
 # Inception
-**Inception** is a highly configurable tool to check for whatever you like against any number of hosts.
+**Inception** is a highly configurable tool to check for whatever you like against any number of hosts. It is extremely easy to use, yet highly configurable. It only takes few minutes to create fingerprints/signatures of the desired vulnerability/service one wants to scan by using [providerCreate.html](https://proabiral.github.io/inception/providerCreate.html) .
 
-This tool comes handy for bugbounty hunters who want to check for specific endpoint on large number of hosts and report if the endpoint contains certain string in response.
+This tool comes handy for bugbounty hunters who want to check for specific endpoint on large number of hosts and report if the endpoint returns the specified String, Status Code or Content-Length.
 
 Inception is a Go version of [Snallygaster](https://github.com/hannob/snallygaster) and comes with a large number of test cases derived from Snallygaster plus more, added by me.    
 
 Default test cases includes: test for publicly accesible git config file, .env file, magento config file, php info file, server stats page, Rails and Symfony database config files, CORS Misconfiguration check, basic XSS check at web root and few others.    
 
-What differentiate Inception from Snallygaster is - it allows users to create & provide their own test cases without touching a single line of code.
+What differentiate Inception from Snallygaster is - Inception allows users to create & provide their own test cases without touching a single line of code.
 
-The use of goroutine makes it very fast but it doesn't hammer a single domain concurrently with a large number of requests.
+The use of goroutine makes it very fast but it doesn't hammer a single domain concurrently with a large number of requests as single test case is performed against all the specified domain before moving to another test case.
+
+### Key Features
+1) Very easy to use and create signatures using [providerCreate.html](https://proabiral.github.io/inception/providerCreate.html)
+2) Extremely fast due to use of goroutine
+3) Does not hammer single server and prevent WAF blocking
+4) Highly configurable to send GET/POST/HEAD/PUT/DELETE request with desired headers and body.
+5) Minimum False Positive as Response can be filered with specific String, Status code, Content Length.
 
 ### Installation
 Just make sure you have go installed and run the following command.
@@ -34,6 +41,8 @@ go get -u github.com/proabiral/inception
         force https (works only if scheme is not provided in domain list
   -noProgressBar
         hide progress bar
+  -o string
+        File to write JSON result
   -provider string
         Path of provider file (default "/home/proabiral/go/src/github.com/proabiral/inception/provider.json")
   -silent
@@ -46,16 +55,6 @@ go get -u github.com/proabiral/inception
 
 ```
    
-#### Examples
-```
-▶️ inception -d /path/to/domainlist.txt
-Issue detected : Server status is publicly viewable http://127.0.0.1/server-status response contains all check
-Issue detected : PHP info is publicly viewable http://127.0.0.1/phpinfo.php response contains all check
-Completed
-```
-All detected issues will be printed on screen as shown above. While if no issue is detected, a completion message is shown as `Completed`.    
-Note: If error like `provider.json: no such file or directory` is thrown, provide the path of provider.json {default one located at your-gopath/src/github.com/proabiral/inception/provider.json} file with -provider option.    
-    
 ### FAQs
 Q. How should my domain list look like?    
 A sample of domain list is provided with the tool. It's basically a list of line seperated domains without no protocol.
@@ -96,23 +95,43 @@ You can use [providerCreate.html](https://proabiral.github.io/inception/provider
            "checkFor": "Current thread count"
        }
 ]
+
 ```
+
 Save the generated JSON to some file and then run the tool by providing the path to the json file with `-provider` option:
 ```
 ▶️  inception -provider /path/to/your/provider.json -d /path/to/your/domainlist.txt
 ```
 
+##### Placeholders in Providers
+You can also use the following predefined placeholders in provider.json which will get replaced according to the URL against which the tool is ran.
+* $hostname
+* $domain 
+* $fqdn
+
+For example, if you're running inception against www.example.com
+
+$hostname becomes example  <br />
+$domain becomes example.com and <br />  
+$fqdn becomes www.example.com <br />
+
+This is very helpful for cases like CORS. Or if you want to check for files prefixed by domain name or alike.
+
+#### Examples
+```
+▶️ inception -d /path/to/domainlist.txt
+Issue detected : Server status is publicly viewable http://127.0.0.1/server-status response contains all check
+Issue detected : PHP info is publicly viewable http://127.0.0.1/phpinfo.php response contains all check
+Completed
+```
+All detected issues will be printed on screen as shown above. While if no issue is detected, a completion message is shown as `Completed`.    
+Note: If error like `provider.json: no such file or directory` is thrown, provide the path of provider.json {default one located at your-gopath/src/github.com/proabiral/inception/provider.json} file with -provider option.    
+
+
+
 Q. Whats with the name?    
 The name of tool is inspired from the movie Inception where DiCaprio steals secrets from subconscious mind of people. Similar to movie, this tool steal secrets from webserver.    
 Also, `inception` because this is the first tool I am open sourcing.
-
-### TODO
-1. Add more vulnerability checks
-2. ~~Implement ReGex search in Response~~
-3. Add key to each test case in provider.json and option to select/ignore a test case
-4. Output result to file
-5. Randomize User-Agent
-6. Code refactor
 
 ## Thanks 
 Thanks to [Iceman](https://twitter.com/Ice3man543) for reviewing the tool and suggesting this cool name.
