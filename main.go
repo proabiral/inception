@@ -160,6 +160,7 @@ func stringReplacer(URL string, value string) (string, error) {
 
 func request(domain string, provider Provider) []error {
 	var URL string
+	var pHeaders [][]string
 	if https {
 		scheme = "https://"
 	} else {
@@ -178,19 +179,17 @@ func request(domain string, provider Provider) []error {
 
 		//replacing keywords {$domain, $hostname, $fqdn} from endpoints,vulnerability name, body and checkFor if any
 		// need to find a way to replace headers
-		URL, err := stringReplacer(URL, URL)
-		if err != nil {
-			continue
-		}
+		URL, _ := stringReplacer(URL, URL)
+
 		provider.Vulnerability, _ = stringReplacer(URL, provider.Vulnerability)
 		provider.Body, _ = stringReplacer(URL, provider.Body)
 		provider.CheckFor, _ = stringReplacer(URL, provider.CheckFor)
 
-		//   Replacing header does not works
-		//for _,header := range provider.Headers {
-		//	header[0] = stringReplacer(URL,header[0])
-		//	header[1] = stringReplacer(URL,header[1])
-		//}
+		for i,_ := range provider.Headers {
+			header_name,_ := stringReplacer(URL,provider.Headers[i][0])
+			header_value,_ := stringReplacer(URL,provider.Headers[i][1])
+			pHeaders = append(pHeaders,[]string{header_name,header_value})
+		}
 
 		method := provider.Method
 		if len(provider.Headers) == 0 { // todo correct this if statement, when no header is supplied.
@@ -229,7 +228,7 @@ func request(domain string, provider Provider) []error {
 				Timeout(time.Second*10).
 				Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36").
 				CustomMethod(method, URL).
-				CustomHeader(provider.Headers). //added this method this gorequest library ... need to fork that library and import in this project so that everone pulling this could use it
+				CustomHeader(pHeaders). //added this method this gorequest library ... need to fork that library and import in this project so that everone pulling this could use it
 				Send(provider.Body).
 				End()
 
