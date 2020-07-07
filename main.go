@@ -132,6 +132,48 @@ func errCheck(err error) {
 	}
 }
 
+func getDetailedError(err error, data []byte) error {
+	var limit int64 = 20
+
+	syntaxError, ok := err.(*json.SyntaxError)
+	if ok {
+		start := syntaxError.Offset - 1
+		if start < 0 {
+			start = 0
+		}
+
+		end := start + limit
+		dataLength := int64(len(data))
+		if end > dataLength {
+			end = dataLength
+		}
+
+		badPart := string(data[start:end])
+		return fmt.Errorf("%s:\n%s", err.Error(), badPart)
+	}
+
+	typeError, ok := err.(*json.UnmarshalTypeError)
+	if ok {
+		start := typeError.Offset - limit
+		if start < 0 {
+			start = 0
+		}
+
+		badPart := string(data[start:typeError.Offset])
+		return fmt.Errorf("%s:\n%s", err.Error(), badPart)
+	}
+
+	return err
+}
+
+func errCheckJSON(err error, data []byte) {
+	if err != nil {
+		err = getDetailedError(err, data)
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func printIfNotSilent(message string) {
 	if !Silent {
 		fmt.Println(message)
@@ -445,7 +487,7 @@ func main() {
 	contentJson := readFile(ProviderFile)
 
 	err := json.Unmarshal(contentJson, &myProvider)
-	errCheck(err)
+	errCheckJSON(err, contentJson)
 
 	validate := validator.New()
 	for i, _ := range myProvider {
