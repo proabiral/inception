@@ -89,11 +89,10 @@ var (
 
 var bar *pb.ProgressBar
 
-func readFile(file string) string {
+func readFile(file string) []byte {
 	contentByte, err := ioutil.ReadFile(file)
 	errCheck(err)
-	content := string(contentByte)
-	return content
+	return contentByte
 }
 
 func readLines(r io.Reader) []string {
@@ -185,10 +184,10 @@ func request(domain string, provider Provider) []error {
 		provider.Body, _ = stringReplacer(URL, provider.Body)
 		provider.CheckFor, _ = stringReplacer(URL, provider.CheckFor)
 
-		for i,_ := range provider.Headers {
-			header_name,_ := stringReplacer(URL,provider.Headers[i][0])
-			header_value,_ := stringReplacer(URL,provider.Headers[i][1])
-			pHeaders = append(pHeaders,[]string{header_name,header_value})
+		for i, _ := range provider.Headers {
+			header_name, _ := stringReplacer(URL, provider.Headers[i][0])
+			header_value, _ := stringReplacer(URL, provider.Headers[i][1])
+			pHeaders = append(pHeaders, []string{header_name, header_value})
 		}
 
 		method := provider.Method
@@ -430,22 +429,22 @@ func main() {
 	flag.Parse()
 
 	printIfNotSilent(`
-(_)                    | | (_)            
- _ _ __   ___ ___ _ __ | |_ _  ___  _ __  
-| | '_ \ / __/ _ \ '_ \| __| |/ _ \| '_ \ 
+(_)                    | | (_)
+ _ _ __   ___ ___ _ __ | |_ _  ___  _ __
+| | '_ \ / __/ _ \ '_ \| __| |/ _ \| '_ \
 | | | | | (_|  __/ |_) | |_| | (_) | | | |
 |_|_| |_|\___\___| .__/ \__|_|\___/|_| |_|
-                 | |                      
-                 |_|                      
+                 | |
+                 |_|
 
-	
+
 	`)
 
 	printIfNotSilent("Reading Providers from list at " + ProviderFile)
 
 	contentJson := readFile(ProviderFile)
 
-	err := json.Unmarshal([]byte(contentJson), &myProvider)
+	err := json.Unmarshal(contentJson, &myProvider)
 	errCheck(err)
 
 	validate := validator.New()
