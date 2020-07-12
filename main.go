@@ -89,11 +89,10 @@ var (
 
 var bar *pb.ProgressBar
 
-func readFile(file string) string {
+func readFile(file string) []byte {
 	contentByte, err := ioutil.ReadFile(file)
 	errCheck(err)
-	content := string(contentByte)
-	return content
+	return contentByte
 }
 
 func readLines(r io.Reader) []string {
@@ -128,6 +127,48 @@ func lineCounter(r io.Reader) (int, error) {
 
 func errCheck(err error) {
 	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func getDetailedError(err error, data []byte) error {
+	var limit int64 = 20
+
+	syntaxError, ok := err.(*json.SyntaxError)
+	if ok {
+		start := syntaxError.Offset - 1
+		if start < 0 {
+			start = 0
+		}
+
+		end := start + limit
+		dataLength := int64(len(data))
+		if end > dataLength {
+			end = dataLength
+		}
+
+		badPart := string(data[start:end])
+		return fmt.Errorf("%s:\n%s", err.Error(), badPart)
+	}
+
+	typeError, ok := err.(*json.UnmarshalTypeError)
+	if ok {
+		start := typeError.Offset - limit
+		if start < 0 {
+			start = 0
+		}
+
+		badPart := string(data[start:typeError.Offset])
+		return fmt.Errorf("%s:\n%s", err.Error(), badPart)
+	}
+
+	return err
+}
+
+func errCheckJSON(err error, data []byte) {
+	if err != nil {
+		err = getDetailedError(err, data)
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -185,10 +226,10 @@ func request(domain string, provider Provider) []error {
 		provider.Body, _ = stringReplacer(URL, provider.Body)
 		provider.CheckFor, _ = stringReplacer(URL, provider.CheckFor)
 
-		for i,_ := range provider.Headers {
-			header_name,_ := stringReplacer(URL,provider.Headers[i][0])
-			header_value,_ := stringReplacer(URL,provider.Headers[i][1])
-			pHeaders = append(pHeaders,[]string{header_name,header_value})
+		for i, _ := range provider.Headers {
+			header_name, _ := stringReplacer(URL, provider.Headers[i][0])
+			header_value, _ := stringReplacer(URL, provider.Headers[i][1])
+			pHeaders = append(pHeaders, []string{header_name, header_value})
 		}
 
 		method := provider.Method
@@ -430,23 +471,23 @@ func main() {
 	flag.Parse()
 
 	printIfNotSilent(`
-(_)                    | | (_)            
- _ _ __   ___ ___ _ __ | |_ _  ___  _ __  
-| | '_ \ / __/ _ \ '_ \| __| |/ _ \| '_ \ 
+(_)                    | | (_)
+ _ _ __   ___ ___ _ __ | |_ _  ___  _ __
+| | '_ \ / __/ _ \ '_ \| __| |/ _ \| '_ \
 | | | | | (_|  __/ |_) | |_| | (_) | | | |
 |_|_| |_|\___\___| .__/ \__|_|\___/|_| |_|
-                 | |                      
-                 |_|                      
+                 | |
+                 |_|
 
-	
+
 	`)
 
 	printIfNotSilent("Reading Providers from list at " + ProviderFile)
 
 	contentJson := readFile(ProviderFile)
 
-	err := json.Unmarshal([]byte(contentJson), &myProvider)
-	errCheck(err)
+	err := json.Unmarshal(contentJson, &myProvider)
+	errCheckJSON(err, contentJson)
 
 	validate := validator.New()
 	for i, _ := range myProvider {
