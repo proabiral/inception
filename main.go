@@ -133,7 +133,7 @@ func errCheck(err error) {
 }
 
 func getDetailedError(err error, data []byte) error {
-	var limit int64 = 20
+	var limit int64 = 60
 
 	syntaxError, ok := err.(*json.SyntaxError)
 	if ok {
