@@ -462,6 +462,7 @@ func checker(URL string, response gorequest.Response, body string, provider Prov
 func readJSON(file string, myProvider *[]Provider) {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		fmt.Printf("Provider file %s doesn't exist!\n", file)
+		return
 	}
 
 	contentJson := readFile(file)
