@@ -166,10 +166,10 @@ func getDetailedError(err error, data []byte) error {
 	return err
 }
 
-func errCheckJSON(err error, data []byte) {
+func errCheckJSON(err error, data []byte, file string) {
 	if err != nil {
 		err = getDetailedError(err, data)
-		fmt.Println(err)
+		fmt.Printf("Error reading %s: %s\n", file, err)
 		os.Exit(1)
 	}
 }
@@ -462,7 +462,7 @@ func readJSON(file string, myProvider *[]Provider) {
 	contentJson := readFile(file)
 	tempProvider := []Provider{}
 	err := json.Unmarshal(contentJson, &tempProvider)
-	errCheckJSON(err, contentJson)
+	errCheckJSON(err, contentJson, file)
 
 	if len(tempProvider) > 0 {
 		*myProvider = append(*myProvider, tempProvider...)
