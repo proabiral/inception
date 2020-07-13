@@ -91,7 +91,7 @@ var bar *pb.ProgressBar
 
 func readFile(file string) []byte {
 	contentByte, err := ioutil.ReadFile(file)
-	errCheck(err)
+	errCheckInfo(err)
 	return contentByte
 }
 
@@ -129,6 +129,12 @@ func errCheck(err error) {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func errCheckInfo(err error) {
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 
@@ -170,7 +176,6 @@ func errCheckJSON(err error, data []byte, file string) {
 	if err != nil {
 		err = getDetailedError(err, data)
 		fmt.Printf("Error reading %s: %s\n", file, err)
-		os.Exit(1)
 	}
 }
 
