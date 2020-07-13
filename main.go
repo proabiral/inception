@@ -91,7 +91,7 @@ var bar *pb.ProgressBar
 
 func readFile(file string) []byte {
 	contentByte, err := ioutil.ReadFile(file)
-	errCheck(err)
+	errCheckInfo(err)
 	return contentByte
 }
 
@@ -132,6 +132,12 @@ func errCheck(err error) {
 	}
 }
 
+func errCheckInfo(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func getDetailedError(err error, data []byte) error {
 	var limit int64 = 60
 
@@ -166,11 +172,10 @@ func getDetailedError(err error, data []byte) error {
 	return err
 }
 
-func errCheckJSON(err error, data []byte) {
+func errCheckJSON(err error, data []byte, file string) {
 	if err != nil {
 		err = getDetailedError(err, data)
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Printf("Error reading %s: %s\n", file, err)
 	}
 }
 
@@ -454,6 +459,32 @@ func checker(URL string, response gorequest.Response, body string, provider Prov
 	}
 }
 
+func readJSON(file string, myProvider *[]Provider) {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		fmt.Printf("Provider file %s doesn't exist!\n", file)
+		return
+	}
+
+	contentJson := readFile(file)
+	tempProvider := []Provider{}
+	err := json.Unmarshal(contentJson, &tempProvider)
+	errCheckJSON(err, contentJson, file)
+
+	if len(tempProvider) > 0 {
+		*myProvider = append(*myProvider, tempProvider...)
+	}
+}
+
+func readJSONs(myProvider *[]Provider) {
+	if len(flag.Args()) == 0 {
+		return
+	}
+
+	for _, file := range flag.Args() {
+		readJSON(file, myProvider)
+	}
+}
+
 func main() {
 
 	path := os.Getenv("GOPATH") + "/src/github.com/proabiral/inception/"
@@ -484,14 +515,12 @@ func main() {
 
 	printIfNotSilent("Reading Providers from list at " + ProviderFile)
 
-	contentJson := readFile(ProviderFile)
-
-	err := json.Unmarshal(contentJson, &myProvider)
-	errCheckJSON(err, contentJson)
+	readJSON(ProviderFile, &myProvider)
+	readJSONs(&myProvider)
 
 	validate := validator.New()
 	for i, _ := range myProvider {
-		err = validate.Struct(myProvider[i])
+		err := validate.Struct(myProvider[i])
 		if err != nil {
 			log.Printf("Error on index number %d of given JSON Fingerprint Array", i)
 		}
