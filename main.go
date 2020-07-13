@@ -454,6 +454,31 @@ func checker(URL string, response gorequest.Response, body string, provider Prov
 	}
 }
 
+func readJSON(file string, myProvider *[]Provider) {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		fmt.Printf("Provider file %s doesn't exist!\n", file)
+	}
+
+	contentJson := readFile(file)
+	tempProvider := []Provider{}
+	err := json.Unmarshal(contentJson, &tempProvider)
+	errCheckJSON(err, contentJson)
+
+	if len(tempProvider) > 0 {
+		*myProvider = append(*myProvider, tempProvider...)
+	}
+}
+
+func readJSONs(myProvider *[]Provider) {
+	if len(flag.Args()) == 0 {
+		return
+	}
+
+	for _, file := range flag.Args() {
+		readJSON(file, myProvider)
+	}
+}
+
 func main() {
 
 	path := os.Getenv("GOPATH") + "/src/github.com/proabiral/inception/"
@@ -484,14 +509,12 @@ func main() {
 
 	printIfNotSilent("Reading Providers from list at " + ProviderFile)
 
-	contentJson := readFile(ProviderFile)
-
-	err := json.Unmarshal(contentJson, &myProvider)
-	errCheckJSON(err, contentJson)
+	readJSON(ProviderFile, &myProvider)
+	readJSONs(&myProvider)
 
 	validate := validator.New()
 	for i, _ := range myProvider {
-		err = validate.Struct(myProvider[i])
+		err := validate.Struct(myProvider[i])
 		if err != nil {
 			log.Printf("Error on index number %d of given JSON Fingerprint Array", i)
 		}
